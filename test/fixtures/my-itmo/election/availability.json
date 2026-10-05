@@ -1,0 +1,17 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "id": 1000,
+    "status": "synthetic-1",
+    "semesterStart": "2026-09-01T10:00:00.026+03:00",
+    "semesterEnd": "2026-09-01T10:00:00.098+03:00",
+    "dateStart": "2026-09-01T10:00:00.161+03:00",
+    "dateEnd": "2026-09-01T10:00:00.658+03:00",
+    "timeStart": "10:00",
+    "timeEnd": "10:00",
+    "studyYear": "2026/2027",
+    "semesterId": 1002,
+    "semester": 1003
+  }
+}

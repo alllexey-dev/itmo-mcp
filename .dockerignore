@@ -1,0 +1,13 @@
+node_modules
+dist
+vibe
+coverage
+.git
+.github
+.env*
+.keycloak-identity
+.refresh-token
+*.har
+test
+scripts
+openapi

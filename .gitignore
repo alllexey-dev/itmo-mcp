@@ -1,0 +1,9 @@
+node_modules/
+dist/
+vibe/
+.env
+.env.*
+.keycloak-identity
+.refresh-token
+*.har
+coverage/

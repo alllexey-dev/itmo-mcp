@@ -1,0 +1,32 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "table_id": 1000,
+      "table_name": "synthetic-1",
+      "table_address": "synthetic-2",
+      "queue_comment": null,
+      "application_id": 1003,
+      "type_id": 1004,
+      "date": "2026-09-01T10:00:00+03:00",
+      "phone": "synthetic-5",
+      "comment": null,
+      "consult_id": null,
+      "consult_fio": null
+    },
+    {
+      "table_id": 1006,
+      "table_name": "synthetic-7",
+      "table_address": "synthetic-8",
+      "queue_comment": "synthetic-9",
+      "application_id": 1010,
+      "type_id": 1011,
+      "date": "2026-09-01T10:00:00+03:00",
+      "phone": "100012",
+      "comment": null,
+      "consult_id": null,
+      "consult_fio": null
+    }
+  ]
+}

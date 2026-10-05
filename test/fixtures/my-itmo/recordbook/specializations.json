@@ -1,0 +1,33 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "main_plan": 1000,
+      "semesters": [
+        {
+          "study_year": "2026/2027",
+          "semester": 1001,
+          "sem_id": 1002,
+          "course": 1003,
+          "actual": false
+        },
+        {
+          "study_year": "2026/2027",
+          "semester": 1004,
+          "sem_id": 1005,
+          "course": 1006,
+          "actual": false
+        },
+        {
+          "study_year": "2026/2027",
+          "semester": 1007,
+          "sem_id": 1008,
+          "course": 1009,
+          "actual": false
+        }
+      ],
+      "specialization_name": "synthetic-10"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "name": "itmo-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for ITMO University student services: my.itmo.ru and bars.itmo.ru",
+  "license": "MIT",
+  "author": "alllexey",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alllexey-dev/itmo-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "itmo",
+    "my.itmo.ru",
+    "bars",
+    "model-context-protocol"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "itmo-mcp": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "openapi",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint:spec": "redocly lint openapi/my-itmo.yaml openapi/bars.yaml",
+    "gen": "openapi-typescript openapi/my-itmo.yaml -o src/generated/my-itmo.ts && openapi-typescript openapi/bars.yaml -o src/generated/bars.ts",
+    "prepublishOnly": "npm run build",
+    "gen:check": "node scripts/gen-check.mjs",
+    "verify:live": "tsx scripts/verify-live.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "openapi-fetch": "^0.17.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.57.0",
+    "@types/node": "^26.6.4",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "openapi-typescript": "^7.13.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents": false
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./openapi/*": "./openapi/*"
+  },
+  "homepage": "https://github.com/alllexey-dev/itmo-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/alllexey-dev/itmo-mcp/issues"
+  }
+}

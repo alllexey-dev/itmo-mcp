@@ -1,0 +1,64 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "contractId": "synthetic-0",
+      "number": "synthetic-1",
+      "dateStart": "2026-09-01T10:00:00+03:00",
+      "dateEnd": "2026-09-01T10:00:00+03:00",
+      "name": "synthetic-2",
+      "active": true,
+      "balance": 1003,
+      "payments": [
+        {
+          "sum": 12.5,
+          "payUntil": "2026-09-01T10:00:00+03:00",
+          "period": "synthetic-4",
+          "paid": 1005
+        },
+        {
+          "sum": 12.5,
+          "payUntil": "2026-09-01T10:00:00+03:00",
+          "period": "synthetic-6",
+          "paid": 1007
+        },
+        {
+          "sum": 12.5,
+          "payUntil": "2026-09-01T10:00:00+03:00",
+          "period": "synthetic-8",
+          "paid": 1009
+        }
+      ]
+    },
+    {
+      "contractId": "synthetic-10",
+      "number": "synthetic-11",
+      "dateStart": "2026-09-01T10:00:00+03:00",
+      "dateEnd": "2026-09-01T10:00:00+03:00",
+      "name": "synthetic-12",
+      "active": false,
+      "balance": 12.5,
+      "payments": [
+        {
+          "sum": 12.5,
+          "payUntil": "2026-09-01T10:00:00+03:00",
+          "period": "synthetic-13",
+          "paid": 12.5
+        },
+        {
+          "sum": 12.5,
+          "payUntil": "2026-09-01T10:00:00+03:00",
+          "period": "synthetic-14",
+          "paid": 12.5
+        },
+        {
+          "sum": 12.5,
+          "payUntil": "2026-09-01T10:00:00+03:00",
+          "period": "synthetic-15",
+          "paid": 12.5
+        }
+      ]
+    }
+  ]
+}

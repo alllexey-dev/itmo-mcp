@@ -1,0 +1,10 @@
+[
+  {
+    "type": "synthetic-0",
+    "name": "synthetic-1",
+    "identifier": "100002",
+    "checkpoint_plan_ids": [
+      1003
+    ]
+  }
+]

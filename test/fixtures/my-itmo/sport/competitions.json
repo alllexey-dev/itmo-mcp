@@ -1,0 +1,66 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "competition_type_id": 1001,
+      "competition_type_name": "synthetic-2",
+      "name": "synthetic-3",
+      "sport_type_id": 1004,
+      "sport_type_name": "synthetic-5",
+      "building_id": 1006,
+      "building_name": "synthetic-7",
+      "date_start": "2026-09-01T10:00:00+03:00",
+      "date_end": "2026-09-01T10:00:00+03:00",
+      "free_registration": true,
+      "competition_status_id": 1008,
+      "competition_status_name": "synthetic-9",
+      "limit": 1010,
+      "available": 1011,
+      "registration_link": null,
+      "disciplines": [
+        {
+          "id": 1012,
+          "name": "synthetic-13",
+          "signed": 1014
+        }
+      ],
+      "sign_in_info": {
+        "can_sign_in": true,
+        "unavailable_reasons": null
+      },
+      "signed": 1015
+    },
+    {
+      "id": 1016,
+      "competition_type_id": 1017,
+      "competition_type_name": "synthetic-18",
+      "name": "synthetic-19",
+      "sport_type_id": 1020,
+      "sport_type_name": "synthetic-21",
+      "building_id": 1022,
+      "building_name": "synthetic-23",
+      "date_start": "2026-09-01T10:00:00+03:00",
+      "date_end": "2026-09-01T10:00:00+03:00",
+      "free_registration": true,
+      "competition_status_id": 1024,
+      "competition_status_name": "synthetic-25",
+      "limit": 1026,
+      "available": 1027,
+      "registration_link": "synthetic-28",
+      "disciplines": [
+        {
+          "id": 1029,
+          "name": "synthetic-30",
+          "signed": 1031
+        }
+      ],
+      "sign_in_info": {
+        "can_sign_in": true,
+        "unavailable_reasons": null
+      },
+      "signed": 1032
+    }
+  ]
+}

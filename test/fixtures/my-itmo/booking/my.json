@@ -1,0 +1,120 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": {
+    "count": 1000,
+    "list": [
+      {
+        "booking_id": 1001,
+        "start_datetime": "2026-09-01T10:00:00+03:00",
+        "end_datetime": "2026-09-01T10:00:00+03:00",
+        "name": "synthetic-2",
+        "participants": 1003,
+        "owner_isu": 1004,
+        "owner_fio": "synthetic-5",
+        "contact_phone": "synthetic-6",
+        "room": {
+          "room_id": 1007,
+          "room_name": "synthetic-8",
+          "room_number": "synthetic-9",
+          "address": "synthetic-10",
+          "min_booking_days": 1011,
+          "max_booking_days": null
+        },
+        "equipment": [],
+        "status": {
+          "status_id": 1012,
+          "status_name": "synthetic-13"
+        },
+        "invite": null,
+        "additional_info": null,
+        "event": null,
+        "co_bookers": [],
+        "created_at": "synthetic-14",
+        "category": {
+          "category_id": 1015,
+          "category_name": "synthetic-16"
+        },
+        "building_id": 1017,
+        "link_to_virtual_room": null,
+        "link_for_invite_to_virtual_room": null,
+        "password_for_virtual_room": null,
+        "password_for_room": null
+      },
+      {
+        "booking_id": 1018,
+        "start_datetime": "2026-09-01T10:00:00+03:00",
+        "end_datetime": "2026-09-01T10:00:00+03:00",
+        "name": "synthetic-19",
+        "participants": 1020,
+        "owner_isu": 1021,
+        "owner_fio": "synthetic-22",
+        "contact_phone": "synthetic-23",
+        "room": {
+          "room_id": 1024,
+          "room_name": "synthetic-25",
+          "room_number": "synthetic-26",
+          "address": "synthetic-27",
+          "min_booking_days": 1028,
+          "max_booking_days": null
+        },
+        "equipment": [],
+        "status": {
+          "status_id": 1029,
+          "status_name": "synthetic-30"
+        },
+        "invite": null,
+        "additional_info": null,
+        "event": null,
+        "co_bookers": [],
+        "created_at": "synthetic-31",
+        "category": {
+          "category_id": 1032,
+          "category_name": "synthetic-33"
+        },
+        "building_id": 1034,
+        "link_to_virtual_room": null,
+        "link_for_invite_to_virtual_room": null,
+        "password_for_virtual_room": null,
+        "password_for_room": null
+      },
+      {
+        "booking_id": 1035,
+        "start_datetime": "2026-09-01T10:00:00+03:00",
+        "end_datetime": "2026-09-01T10:00:00+03:00",
+        "name": "synthetic-36",
+        "participants": 1037,
+        "owner_isu": 1038,
+        "owner_fio": "synthetic-39",
+        "contact_phone": "synthetic-40",
+        "room": {
+          "room_id": 1041,
+          "room_name": "synthetic-42",
+          "room_number": "synthetic-43",
+          "address": "synthetic-44",
+          "min_booking_days": 1045,
+          "max_booking_days": null
+        },
+        "equipment": [],
+        "status": {
+          "status_id": 1046,
+          "status_name": "synthetic-47"
+        },
+        "invite": null,
+        "additional_info": null,
+        "event": null,
+        "co_bookers": [],
+        "created_at": "synthetic-48",
+        "category": {
+          "category_id": 1049,
+          "category_name": "synthetic-50"
+        },
+        "building_id": 1051,
+        "link_to_virtual_room": null,
+        "link_for_invite_to_virtual_room": null,
+        "password_for_virtual_room": null,
+        "password_for_room": null
+      }
+    ]
+  }
+}

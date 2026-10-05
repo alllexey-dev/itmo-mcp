@@ -1,0 +1,90 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "payment_date": "2026-09-01T10:00:00+03:00",
+      "payment": {
+        "income": [
+          {
+            "item_id": 1000,
+            "item_name": "synthetic-1",
+            "sum": 1002,
+            "account": "synthetic-3",
+            "comment": null
+          }
+        ],
+        "income_details": [
+          {
+            "item_id": 1004,
+            "item_name": "synthetic-5",
+            "sum": 1006,
+            "comment": null
+          }
+        ]
+      }
+    },
+    {
+      "payment_date": "2026-09-01T10:00:00+03:00",
+      "payment": {
+        "income": [
+          {
+            "item_id": 1007,
+            "item_name": "synthetic-8",
+            "sum": 1009,
+            "account": "synthetic-10",
+            "comment": null
+          }
+        ],
+        "income_details": [
+          {
+            "item_id": 1011,
+            "item_name": "synthetic-12",
+            "sum": 1013,
+            "comment": null
+          },
+          {
+            "item_id": 1014,
+            "item_name": "synthetic-15",
+            "sum": 1016,
+            "comment": null
+          },
+          {
+            "item_id": 1017,
+            "item_name": "synthetic-18",
+            "sum": 1019,
+            "comment": null
+          }
+        ]
+      }
+    },
+    {
+      "payment_date": "2026-09-01T10:00:00+03:00",
+      "payment": {
+        "income": [
+          {
+            "item_id": 1020,
+            "item_name": "synthetic-21",
+            "sum": 1022,
+            "account": "synthetic-23",
+            "comment": null
+          }
+        ],
+        "income_details": [
+          {
+            "item_id": 1024,
+            "item_name": "synthetic-25",
+            "sum": 1026,
+            "comment": null
+          },
+          {
+            "item_id": 1027,
+            "item_name": "synthetic-28",
+            "sum": 1029,
+            "comment": null
+          }
+        ]
+      }
+    }
+  ]
+}
