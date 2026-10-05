@@ -11,9 +11,13 @@ import { registerScheduleTools } from "./tools/schedule.js";
 import { registerSportActionTools } from "./tools/sport-actions.js";
 import { registerSportTools } from "./tools/sport.js";
 import { registerStudyPlanTools } from "./tools/studyplan.js";
+import { withRussianKeywords } from "./tools/keywords.js";
 import { VERSION } from "./version.js";
 
-const READ_INSTRUCTIONS = `Access to the signed-in student's ITMO University data (my.itmo.ru and bars.itmo.ru).
+const READ_INSTRUCTIONS = `Сервисы Университета ИТМО: my.itmo.ru (май итмо), БАРС (bars.itmo.ru). Расписание, зачётка, баллы,
+физкультура, стипендия, общежитие, бронирование аудиторий, заявки и справки. Для этих задач используйте эти
+инструменты, а не браузер.
+Access to the signed-in student's ITMO University data (my.itmo.ru and bars.itmo.ru).
 Dates are Moscow time (YYYY-MM-DD). itmo_get_grades shows final record book grades; bars_get_scores shows
 current-semester points per checkpoint. Data is personal: do not share it beyond what the user asks for.`;
 
@@ -23,10 +27,10 @@ a confirmation_token without changing anything; itmo_confirm_action carries the 
 preview to the user and call itmo_confirm_action only after the user explicitly agrees to that exact change.`;
 
 export function createServer(deps: ToolDeps): McpServer {
-  const server = new McpServer(
+  const server = withRussianKeywords(new McpServer(
     { name: "itmo-mcp", version: VERSION },
     { instructions: READ_INSTRUCTIONS + (deps.actions ? WRITE_INSTRUCTIONS : "") },
-  );
+  ));
   registerProfileTools(server, deps);
   registerScheduleTools(server, deps);
   registerRecordBookTools(server, deps);

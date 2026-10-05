@@ -253,3 +253,30 @@ describe("itmo-mcp server", () => {
     expect(res).toMatchObject({ isError: true, text: "No ITMO credentials: set ITMO_USERNAME" });
   });
 });
+
+describe("russian keywords", () => {
+  it("every tool, including write tools, has a Russian summary that names ITMO or BARS", async () => {
+    const { PendingActions } = await import("../../src/tools/actions.js");
+    const fetchFn = stubFetch(() => json({}));
+    const tokens = { accessToken: async () => "t", forceRefresh: async () => "t" };
+    const server = createServer({
+      my: createMyItmoClient({ tokens, fetchFn }),
+      bars: createBarsClient({ session: { authorization: async () => "Bearer b", invalidate: () => undefined }, fetchFn }),
+      isu: async () => 1,
+      now: () => new Date(),
+      actions: new PendingActions(),
+    });
+    const [serverSide, clientSide] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "0" });
+    await Promise.all([server.connect(serverSide), client.connect(clientSide)]);
+
+    const { tools } = await client.listTools();
+
+    expect(tools).toHaveLength(33);
+    for (const tool of tools) {
+      expect(tool.description, tool.name).toMatch(/[а-яё]/i);
+      expect(tool.description, tool.name).toMatch(/ИТМО|БАРС/);
+    }
+    expect(client.getInstructions()).toMatch(/май итмо/);
+  });
+});
