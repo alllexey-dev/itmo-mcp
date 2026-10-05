@@ -32,13 +32,13 @@
 | GET | `/journal/disciplines?withCheckpointPlansOnly` | Дисциплины выбранного периода: `id`, `name`, `terms`, `checkpoint_plan_ids` | проверено |
 | GET | `/journal/groups-and-flows?checkpointPlanId` | Группы и потоки журнала: `type`, `identifier`, `checkpoint_plan_ids` | проверено |
 | GET | `/marks/{checkpointPlanId}/{type}/{identifier}/student` | Журнал студента: заголовки контрольных точек и свои баллы | проверено |
-| GET | `/marks/{cp}/{type}/{identifier}/student/{studentId}/history?checkpointId` | История изменений баллов (GET снят, пустой массив) | сайт |
-| GET | `/deadline` | Дедлайны пользователя (GET снят, пустой массив) | сайт |
-| GET | `/config/personal` | Личные настройки (GET снят) | сайт |
+| GET | `/marks/{cp}/{type}/{identifier}/student/{studentId}/history?checkpointId` | История изменений баллов | проверено |
+| GET | `/deadline` | Дедлайны пользователя | проверено |
+| GET | `/config/personal` | Личные настройки | проверено |
 | POST | `/config/personal` | Смена личной настройки `{name: "current_year" или "current_term", value}`, то есть периода | сайт |
 | DELETE | `/config/personal/{id}` | Удаление личной настройки | сайт |
 | POST | `/marks/{cp}/student/agreement` | "Ознакомлен с системой оценивания", без тела, необратимо | сайт |
-| GET | `/journal/checkpoint-plans`, `/journal/cache?term` | Планы контрольных точек и кэш журнала; роль не выяснена | сайт |
+| GET | `/journal/checkpoint-plans`, `/journal/cache?term` | Планы контрольных точек и кэш журнала; роль не выяснена | проверено |
 
 Преподавательские и административные ручки из бандла (не для студента, не описываются подробно): `/marks/final/`,
 `/marks/additional/`, `/marks/{cp}/{type}/approval/{id}/history`, approve, `/deadline/{a}/{b}/{c}`,

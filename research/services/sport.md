@@ -53,7 +53,7 @@
 | POST | `/api/sport/sign/projects/{id}` | Запись в проект, тело `{link}` | сайт |
 | DELETE | `/api/sport/sign/projects/{id}` | Выход из проекта | сайт |
 | GET | `/api/sport/personal/selections` | Отборочные секции и требования к ним | проверено |
-| GET | `/api/sport/personal/open_form?section` | Сохранённая анкета открытого занятия, часто `null` (GET снят) | сайт |
+| GET | `/api/sport/personal/open_form?section` | Сохранённая анкета открытого занятия, часто `null` | проверено |
 | GET | `/api/sport/personal/open_form/ranks` | Справочник спортивных разрядов для анкеты `[{id, value}]` | проверено |
 | GET | `/api/sport/personal/sign_attempts` | Число попыток, одно число | проверено |
 | GET | `/api/sport/personal/externat` | Статус экстерната: `signed`, `externat_status_id`, `decline_reason` | проверено |

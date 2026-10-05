@@ -148,24 +148,28 @@ QR-код - средство физического доступа; агенту
 
 ### Legacy: itmostudents.ru, api.itmostudents.ru, schedule.itmo.su
 
+Проверено 2026-10-05: `itmostudents.ru` отвечает (материальная помощь, плашка, ФИО), `legacy.itmostudents.ru` и
+`api.itmostudents.ru/schedule`, `schedule.itmo.su/api/v1` не отвечают или требуют авторизации. Материальная помощь
+(`mathelp`) - через ITMO.ID, как и остальное; описана в [../openapi/itmo-services.yaml](../openapi/itmo-services.yaml).
+
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
 | GET | `itmostudents.ru /api/future/fio/{isu}` | ФИО по ISU (профиль в "Помощи") | приложение |
 | ? | `itmostudents.ru /api/v1/public/edu/schedule/groups` | Список групп для расписания | приложение |
 | ? | `itmostudents.ru /api/v1/public/edu/schedule/teachers` | Список преподавателей | приложение |
 | ? | `itmostudents.ru /api/v1/public/edu/teachers/{teacherID}` | Карточка преподавателя | приложение |
-| GET | `itmostudents.ru /api/v1/public/is/mathelp/reasons` | Основания материальной помощи | приложение |
-| GET | `itmostudents.ru /api/v1/public/is/mathelp/applicants/me` | Свои заявления на матпомощь | приложение |
+| GET | `itmostudents.ru /api/v1/public/is/mathelp/reasons` | Основания материальной помощи: `{id, name, documents, short_name, ...}` | проверено |
+| GET | `itmostudents.ru /api/v1/public/is/mathelp/applicants/me` | Профиль и заявления на матпомощь: `is_member`, `applications[]` со статусами | проверено |
 | POST | `itmostudents.ru /api/v1/public/is/mathelp/applications/create` | Подать заявление (multipart, `access_token` в query) | приложение |
 | DELETE | `itmostudents.ru /api/v1/public/is/mathelp/applications/{id}` | Отозвать заявление (`access_token` в query) | приложение |
 | ? | `itmostudents.ru /api/v1/public/notifications/register` | Старая регистрация push-токена | приложение |
-| GET | `itmostudents.ru /api/v1/user/plashka?user_id` | Плашка-предупреждение `{title, text}` | приложение |
-| ? | `legacy.itmostudents.ru /events/` | Старый список событий | приложение |
+| GET | `itmostudents.ru /api/v1/user/plashka?user_id` | Плашка-предупреждение `{title, text}` | проверено |
+| ? | `legacy.itmostudents.ru /events/` | Старый список событий | проверено (не отвечает) |
 | ? | `legacy.itmostudents.ru /events/{index}/?username` | Карточка события | приложение |
 | ? | `legacy.itmostudents.ru /events/register/` | Регистрация на событие | приложение |
 | ? | `legacy.itmostudents.ru /partners/`, `/partners/{index}/` | Партнёры и скидки | приложение |
 | ? | `legacy.itmostudents.ru /v2/clubs/introduction/{userID}` | Данные "введения" (`intro_point`), смысл не выяснен | приложение |
-| ? | `api.itmostudents.ru /schedule/personal/` | Старое личное расписание для виджета | приложение |
+| ? | `api.itmostudents.ru /schedule/personal/` | Старое личное расписание для виджета | проверено (не отвечает) |
 | ? | `schedule.itmo.su /api/v1/userinfo` | Старый профиль пользователя | приложение |
 
 Токен в query (`access_token`) - устаревшая схема; не повторять и не логировать такие URL.

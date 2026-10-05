@@ -45,7 +45,7 @@ HTTP 2xx не означает успех, смотреть `error_code` ([../co
 | POST | `/schedule/combined?date_start&date_end` | Расписание набора потоков на период (тело - текущий выбор) | проекты |
 | GET | `/schedule/base/timeline?date_start&date_end` | Базовое (обязательное) расписание семестра | сайт |
 | GET | `/schedule/flows/{id}/timeline` | Расписание одного потока | проекты |
-| GET | `/selected_flow_chains` | Устаревшая; отвечает 404 | проекты |
+| GET | `/selected_flow_chains` | Устаревшая; отвечает 404 | проверено |
 
 ### Факультативы и "Вселенная ИТМО": `/api/facultative/*` и `/api/intro/*`
 
@@ -56,7 +56,7 @@ API одинаковое, отличается только префикс. `{p}
 | GET | `/api/{p}/status/` | Состояние кампании: `semester {choice_status, date_start, date_end, semester, study_year}` | проверено |
 | GET | `/api/{p}/json/` | Дерево модулей и потоков: `result.json` (GET снят: код 97) | сайт |
 | GET | `/api/{p}/current/` | Текущий выбор: `flow_id[]`, `intersections` (GET снят: код 97) | сайт |
-| GET | `/api/{p}/description/`, `/api/{p}/description/start/` | Описания курсов: список и структурированный вид (GET снят: код 97) | сайт |
+| GET | `/api/{p}/description/`, `/api/{p}/description/start/` | Описания курсов: список и структурированный вид | проверено |
 | GET | `/api/{p}/limits/` | Места: `limits`, `start_time`, `end_time` (GET снят: код 97) | сайт |
 | GET | `/api/{p}/schedule/user/` | Базовое расписание студента: `result.json` (GET снят: код 97) | сайт |
 | GET | `/api/{p}/schedule/flow/{flowId}/` | Расписание потока | сайт |

@@ -22,7 +22,7 @@
 |---|---|---|---|
 | GET | `/api/eduPlanNew/programs` | Планы, доступные пользователю: `planId`, `specializationId`, `name`, `isActive`; плюс `isu` | проверено |
 | GET | `/api/eduPlanNew/study_plan/{planId}?spec_id` | Полный рекурсивный план; `spec_id` передаётся, если у программы есть `specializationId` | проверено |
-| GET | `/api/eduPlan/choice/{planId}` | Текущий выбор студента внутри плана (загружается вместе с планом) | сайт |
+| GET | `/api/eduPlan/choice/{planId}` | Текущий выбор студента внутри плана (загружается вместе с планом) | проверено |
 | POST | `/api/eduPlan/{planId}/modules/{moduleId}/disciplines/{disciplineId}/sign` | Выбрать дисциплину по выбору; тело `[{dc_id, semester}]` из `contents` выбранного варианта | сайт |
 | DELETE | `/api/eduPlan/{planId}/modules/{moduleId}/disciplines/{disciplineId}/sign` | Отказаться от выбранной дисциплины; тело то же | сайт |
 | GET | `/api/eduPlan/{planId}/replaceable_discs` | Поданные замены дисциплин: `disciplineIdFrom` и новая дисциплина | сайт |

@@ -24,6 +24,9 @@ tags:
   - name: achievements
   - name: help
   - name: checklist
+  - name: dormitory
+  - name: finances
+  - name: mathelp
 paths:
   /isapp/buildings/:
     servers:
@@ -744,6 +747,310 @@ paths:
                         description: Observed null (no ratings yet)
                         items:
                           type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /dormitory/v1/status/short:
+    servers:
+      - url: https://updaters.api.itmo.su
+    get:
+      operationId: getDormitoryStatusShort
+      tags:
+        - dormitory
+      summary: Short dormitory status used by the app home screen
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          statusId:
+                            type: integer
+                          queuePlace:
+                            description: Observed only null
+                          dormType:
+                            type: string
+                          assignedDormitory:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              address:
+                                type: string
+                            required:
+                              - name
+                              - address
+                        required:
+                          - statusId
+                          - queuePlace
+                          - dormType
+                          - assignedDormitory
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/form:
+    servers:
+      - url: https://scholarship.itmo.pro
+    get:
+      operationId: getStudyForm
+      tags:
+        - finances
+      summary: Form of study (budget or contract) used by the scholarship service
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          study_form:
+                            type: string
+                        required:
+                          - study_form
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/public/is/mathelp/reasons:
+    servers:
+      - url: https://itmostudents.ru
+    get:
+      operationId: getMaterialHelpReasons
+      tags:
+        - mathelp
+      summary: Reasons for material help with required documents
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    documents:
+                      type: string
+                    priority:
+                      type: integer
+                    visible:
+                      type: boolean
+                    short_name:
+                      type: string
+                    is_multiple_in_half_year:
+                      type: boolean
+                  required:
+                    - id
+                    - name
+                    - documents
+                    - priority
+                    - visible
+                    - short_name
+                    - is_multiple_in_half_year
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/public/is/mathelp/applicants/me:
+    servers:
+      - url: https://itmostudents.ru
+    get:
+      operationId: getMyMaterialHelp
+      tags:
+        - mathelp
+      summary: The student's material help profile and applications
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  username:
+                    type: string
+                  surname:
+                    type: string
+                  name:
+                    type: string
+                  patronymic:
+                    type: string
+                  is_member:
+                    type: boolean
+                  is_active:
+                    type: boolean
+                  pending_applications:
+                    type: array
+                    items:
+                      description: Observed empty
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        user_id:
+                          type: integer
+                        status_id:
+                          type: integer
+                        money:
+                          type: integer
+                        other_reason:
+                          description: Observed only null
+                        reason_id:
+                          type: integer
+                        comment:
+                          description: Observed only null
+                        additional_info:
+                          description: Observed only null
+                        payment_date:
+                          description: Observed only null
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        archived_at:
+                          type: string
+                          format: date-time
+                        order_at:
+                          type: string
+                          format: date-time
+                        reason:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            documents:
+                              type: string
+                            priority:
+                              type: integer
+                            visible:
+                              type: boolean
+                            short_name:
+                              type: string
+                            is_multiple_in_half_year:
+                              type: boolean
+                            default_money:
+                              type: integer
+                          required:
+                            - id
+                            - name
+                            - documents
+                            - priority
+                            - visible
+                            - short_name
+                            - is_multiple_in_half_year
+                            - default_money
+                      required:
+                        - id
+                        - user_id
+                        - status_id
+                        - money
+                        - other_reason
+                        - reason_id
+                        - comment
+                        - additional_info
+                        - payment_date
+                        - created_at
+                        - updated_at
+                        - archived_at
+                        - order_at
+                        - reason
+                  payment_type:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      user_id:
+                        type: integer
+                      is_budget:
+                        type: boolean
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      deleted_at:
+                        description: Observed only null
+                    required:
+                      - id
+                      - user_id
+                      - is_budget
+                      - created_at
+                      - updated_at
+                      - deleted_at
+                  membership:
+                    description: Observed only null
+                required:
+                  - id
+                  - username
+                  - surname
+                  - name
+                  - patronymic
+                  - is_member
+                  - is_active
+                  - pending_applications
+                  - applications
+                  - payment_type
+                  - membership
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/user/plashka:
+    servers:
+      - url: https://itmostudents.ru
+    get:
+      operationId: getAlertBanners
+      tags:
+        - actual
+      summary: Alert banners shown above the news feed
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ISU number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      plashki:
+                        type: array
+                        items:
+                          description: Observed empty
+                    required:
+                      - plashki
+                required:
+                  - success
+                  - data
         default:
           $ref: "#/components/responses/Error"
 components:

@@ -22,6 +22,14 @@ tags:
   - name: booking
   - name: finances
   - name: queues
+  - name: election
+  - name: studyplan
+  - name: individual-plan
+  - name: practices
+  - name: gia
+  - name: agreements
+  - name: assistant
+  - name: checklist
 paths:
   /api/sport/personal/selections:
     get:
@@ -1486,6 +1494,1608 @@ paths:
                           required:
                             - time_table_id
                             - date
+        default:
+          $ref: "#/components/responses/Error"
+  /api/election/students/selected_flow_chains:
+    get:
+      operationId: getElectionSelectedFlowChains
+      tags:
+        - election
+      summary: Flow chains selected in the last discipline election (works even when the campaign is closed)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          selectedBy:
+                            type: integer
+                          flowChains:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                disciplineId:
+                                  type: integer
+                                discName:
+                                  type: string
+                                flows:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      flowId:
+                                        type: integer
+                                      flowName:
+                                        type: string
+                                    required:
+                                      - flowId
+                                      - flowName
+                              required:
+                                - disciplineId
+                                - discName
+                                - flows
+                        required:
+                          - selectedBy
+                          - flowChains
+        default:
+          $ref: "#/components/responses/Error"
+  /api/election/students/available_disciplines:
+    get:
+      operationId: getElectionAvailableDisciplines
+      tags:
+        - election
+      summary: "Disciplines available for election. While the campaign is closed: HTTP 403, error_code set and result = campaign availability"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            dcId:
+                              type: integer
+                            discId:
+                              type: integer
+                            langId:
+                              type: integer
+                            depName:
+                              type: string
+                            discName:
+                              type: string
+                            langCode:
+                              type: string
+                            required:
+                              type: boolean
+                            semesters:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  semester:
+                                    type: integer
+                                  statusId:
+                                    type: integer
+                                  groupFlow:
+                                    type: string
+                                  statusName:
+                                    type: string
+                                required:
+                                  - semester
+                                  - statusId
+                                  - groupFlow
+                                  - statusName
+                            description:
+                              type: string
+                            depNameShort:
+                              type: string
+                            notCompatibleWith:
+                              type: array
+                              items:
+                                type: integer
+                          required:
+                            - dcId
+                            - discId
+                            - langId
+                            - depName
+                            - discName
+                            - langCode
+                            - required
+                            - semesters
+                            - description
+                            - depNameShort
+                            - notCompatibleWith
+        default:
+          $ref: "#/components/responses/Error"
+  /api/election/students/limits/flows:
+    get:
+      operationId: getElectionFlowLimits
+      tags:
+        - election
+      summary: Places left per flow. HTTP 403 while the campaign is closed
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          00a /+&?:
+                            type: object
+                            properties:
+                              limitMax:
+                                type: integer
+                              occupied:
+                                type: integer
+                              free:
+                                type: integer
+                            required:
+                              - limitMax
+                              - occupied
+                              - free
+                        required:
+                          - 00a /+&?
+        default:
+          $ref: "#/components/responses/Error"
+  /api/election/students/ordered_flow_chains:
+    get:
+      operationId: getElectionOrderedFlowChains
+      tags:
+        - election
+      summary: Ordered (prioritised) flow chains. HTTP 403 while the campaign is closed
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            groupFlow:
+                              type: string
+                            disciplineId:
+                              type: integer
+                            disciplineName:
+                              type: string
+                            flows:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                  name:
+                                    type: string
+                                  limitMax:
+                                    type: integer
+                                  teachers:
+                                    type: array
+                                    items:
+                                      type: string
+                                  variants:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: integer
+                                        name:
+                                          type: string
+                                        limitMax:
+                                          description: Observed only null
+                                        teachers:
+                                          type: array
+                                          items:
+                                            description: Observed empty
+                                        variants:
+                                          type: array
+                                          items:
+                                            description: Observed empty
+                                        workType:
+                                          type: integer
+                                        available:
+                                          type: boolean
+                                        selections:
+                                          type: array
+                                          items:
+                                            description: Observed empty
+                                      required:
+                                        - id
+                                        - name
+                                        - limitMax
+                                        - teachers
+                                        - variants
+                                        - workType
+                                        - available
+                                        - selections
+                                  workType:
+                                    type: integer
+                                  available:
+                                    type: boolean
+                                  selections:
+                                    type: array
+                                    items:
+                                      type: integer
+                                required:
+                                  - id
+                                  - name
+                                  - limitMax
+                                  - teachers
+                                  - variants
+                                  - workType
+                                  - available
+                                  - selections
+                          required:
+                            - groupFlow
+                            - disciplineId
+                            - disciplineName
+                            - flows
+        default:
+          $ref: "#/components/responses/Error"
+  /api/election/students/chosen_flows:
+    get:
+      operationId: getElectionChosenFlows
+      tags:
+        - election
+      summary: Chosen flows. HTTP 403 while the campaign is closed
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: integer
+        default:
+          $ref: "#/components/responses/Error"
+  /api/facultative/description/:
+    get:
+      operationId: getFacultativeDescriptions
+      tags:
+        - choice
+      summary: Descriptions of facultative disciplines by id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          isu:
+                            type: integer
+                          description:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                description:
+                                  type: string
+                              required:
+                                - id
+                                - description
+                        required:
+                          - isu
+                          - description
+        default:
+          $ref: "#/components/responses/Error"
+  /api/facultative/description/start/:
+    get:
+      operationId: getFacultativeStartPage
+      tags:
+        - choice
+      summary: Intro page of the facultative choice as a tree of blocks
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          isu:
+                            type: integer
+                          description:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                name:
+                                  type: string
+                                type:
+                                  type: string
+                                variants:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: integer
+                                      name:
+                                        type: string
+                                      type:
+                                        type: string
+                                      variants:
+                                        type: array
+                                        items:
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: integer
+                                            url:
+                                              description: Observed only null
+                                            name:
+                                              type: string
+                                            type:
+                                              type: string
+                                            description:
+                                              type: string
+                                          required:
+                                            - id
+                                            - url
+                                            - name
+                                            - type
+                                            - description
+                                    required:
+                                      - id
+                                      - name
+                                      - type
+                                      - variants
+                              required:
+                                - id
+                                - name
+                                - type
+                                - variants
+                        required:
+                          - isu
+                          - description
+        default:
+          $ref: "#/components/responses/Error"
+  /api/eduPlan/choice/{planId}:
+    get:
+      operationId: getStudyPlanChoices
+      tags:
+        - studyplan
+      summary: Elective contents already chosen in the study plan (old study plan service)
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: planId from getStudyPlanPrograms
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          isu:
+                            type: integer
+                          mainPlanId:
+                            type: integer
+                          chosenContents:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                moduleId:
+                                  type: integer
+                                disciplineId:
+                                  type: integer
+                                contentId:
+                                  type: integer
+                                semester:
+                                  type: integer
+                                locked:
+                                  type: boolean
+                                blockId:
+                                  type: integer
+                              required:
+                                - moduleId
+                                - disciplineId
+                                - contentId
+                                - semester
+                                - locked
+                                - blockId
+                        required:
+                          - isu
+                          - mainPlanId
+                          - chosenContents
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/flags:
+    get:
+      operationId: getIndividualPlanFlags
+      tags:
+        - individual-plan
+      summary: Feature flags of the individual study plan service
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                            enabled:
+                              type: boolean
+                            cron:
+                              type: string
+                          required:
+                            - key
+                            - enabled
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/plan/role:
+    get:
+      operationId: getIndividualPlanRole
+      tags:
+        - individual-plan
+      summary: What the user may do in the individual plan service
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          is_admin:
+                            type: boolean
+                          can_create:
+                            type: boolean
+                          edu_levels:
+                            description: Observed only null
+                          forbidden:
+                            type: boolean
+                        required:
+                          - is_admin
+                          - can_create
+                          - edu_levels
+                          - forbidden
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/plan/statuses:
+    get:
+      operationId: getIndividualPlanStatuses
+      tags:
+        - individual-plan
+      summary: Individual plan statuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            short_name:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - short_name
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/plan/directions:
+    get:
+      operationId: getIndividualPlanDirections
+      tags:
+        - individual-plan
+      summary: Training directions directory (code and name)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            code:
+                              type: string
+                            name:
+                              type: string
+                          required:
+                            - id
+                            - code
+                            - name
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/plan/implementers:
+    get:
+      operationId: getIndividualPlanImplementers
+      tags:
+        - individual-plan
+      summary: Faculties and schools that implement programs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            short_name:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - short_name
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/plan/programs:
+    get:
+      operationId: getIndividualPlanPrograms
+      tags:
+        - individual-plan
+      summary: Educational programs directory with enrollment year (about 900 items)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            enrollment_year:
+                              type: integer
+                          required:
+                            - id
+                            - name
+                            - enrollment_year
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/semesters/current:
+    get:
+      operationId: getIndividualPlanCurrentSemester
+      tags:
+        - individual-plan
+      summary: Current semester id of the individual plan service
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          sem_id:
+                            type: integer
+                        required:
+                          - sem_id
+        default:
+          $ref: "#/components/responses/Error"
+  /api/individual-plan/plan:
+    get:
+      operationId: getIndividualPlans
+      tags:
+        - individual-plan
+      summary: Individual plans of the user. Students without access get HTTP 403 with a string error_code and error_details
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Error body observed for a student without access
+                properties:
+                  error_code:
+                    type:
+                      - string
+                      - integer
+                      - "null"
+                  error_message:
+                    type:
+                      - string
+                      - "null"
+                  error_details:
+                    type:
+                      - string
+                      - "null"
+                  result: {}
+        default:
+          $ref: "#/components/responses/Error"
+  /api/practices/practices/all:
+    get:
+      operationId: getMyPractices
+      tags:
+        - practices
+      summary: Internships and practices of the student
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/practices/practices/op:
+    get:
+      operationId: getProgramPractices
+      tags:
+        - practices
+      summary: Practices of the student's educational program
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/practices/report/types:
+    get:
+      operationId: getPracticeTypes
+      tags:
+        - practices
+      summary: Practice types directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            value:
+                              type: string
+                          required:
+                            - id
+                            - value
+        default:
+          $ref: "#/components/responses/Error"
+  /api/practices/report/grades:
+    get:
+      operationId: getPracticeGrades
+      tags:
+        - practices
+      summary: Practice grades directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            value:
+                              type: string
+                          required:
+                            - id
+                            - value
+        default:
+          $ref: "#/components/responses/Error"
+  /api/practices/report/emp_stats:
+    get:
+      operationId: getPracticeEmploymentStatuses
+      tags:
+        - practices
+      summary: Employment statuses directory for practice reports
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            value:
+                              type: string
+                          required:
+                            - id
+                            - value
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/diplomas/my:
+    get:
+      operationId: getMyDiplomas
+      tags:
+        - gia
+      summary: Final qualification works (diplomas) of a graduating student
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty for a non-graduating student
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/me/grants:
+    get:
+      operationId: getMyGrants
+      tags:
+        - gia
+      summary: Grants listed in the graduate portfolio
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type:
+                          - array
+                          - "null"
+                        description: Observed null
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/me/publications:
+    get:
+      operationId: getMyPublications
+      tags:
+        - gia
+      summary: Publications listed in the graduate portfolio
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type:
+                          - array
+                          - "null"
+                        description: Observed null
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/me/speeches:
+    get:
+      operationId: getMySpeeches
+      tags:
+        - gia
+      summary: Conference talks listed in the graduate portfolio
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type:
+                          - array
+                          - "null"
+                        description: Observed null
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/references/academic-titles:
+    get:
+      operationId: getAcademicTitles
+      tags:
+        - gia
+      summary: Academic titles directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name_ru:
+                              type: string
+                            name_en:
+                              type: string
+                          required:
+                            - id
+                            - name_ru
+                            - name_en
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/references/degree-types:
+    get:
+      operationId: getDegreeTypes
+      tags:
+        - gia
+      summary: Academic degrees directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name_ru:
+                              type: string
+                            name_en:
+                              type: string
+                          required:
+                            - id
+                            - name_ru
+                            - name_en
+        default:
+          $ref: "#/components/responses/Error"
+  /api/gia-students/references/diploma-types:
+    get:
+      operationId: getDiplomaTypes
+      tags:
+        - gia
+      summary: Diploma (final work) types directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            diploma_type_id:
+                              type: integer
+                            diploma_type_name:
+                              type: string
+                          required:
+                            - diploma_type_id
+                            - diploma_type_name
+        default:
+          $ref: "#/components/responses/Error"
+  /api/agreements/agreements:
+    get:
+      operationId: getAgreements
+      tags:
+        - agreements
+      summary: Agreements and consents the user has to accept, with versions and signing status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            title:
+                              type: string
+                            code:
+                              type: string
+                            is_bilateral:
+                              type: boolean
+                            versions:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                  version_number:
+                                    type: integer
+                                  date:
+                                    type: string
+                                    format: date
+                                  status_id:
+                                    type: integer
+                                  status_name:
+                                    type: string
+                                  date_signed:
+                                    description: Observed only null
+                                  date_revoked:
+                                    description: Observed only null
+                                  task_id:
+                                    description: Observed only null
+                                  signature_id:
+                                    description: Observed only null
+                                  sign_type:
+                                    type: string
+                                required:
+                                  - id
+                                  - version_number
+                                  - date
+                                  - status_id
+                                  - status_name
+                                  - date_signed
+                                  - date_revoked
+                                  - task_id
+                                  - signature_id
+                                  - sign_type
+                          required:
+                            - id
+                            - title
+                            - code
+                            - is_bilateral
+                            - versions
+        default:
+          $ref: "#/components/responses/Error"
+  /api/agreements/agreements/{id}/:
+    get:
+      operationId: getAgreement
+      tags:
+        - agreements
+      summary: One agreement with its versions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          title:
+                            type: string
+                          code:
+                            type: string
+                          is_bilateral:
+                            type: boolean
+                          versions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                version_number:
+                                  type: integer
+                                date:
+                                  type: string
+                                  format: date
+                                status_id:
+                                  type: integer
+                                status_name:
+                                  type: string
+                                date_signed:
+                                  description: Observed only null
+                                date_revoked:
+                                  description: Observed only null
+                                task_id:
+                                  description: Observed only null
+                                signature_id:
+                                  description: Observed only null
+                                sign_type:
+                                  type: string
+                              required:
+                                - id
+                                - version_number
+                                - date
+                                - status_id
+                                - status_name
+                                - date_signed
+                                - date_revoked
+                                - task_id
+                                - signature_id
+                                - sign_type
+                        required:
+                          - id
+                          - title
+                          - code
+                          - is_bilateral
+                          - versions
+        default:
+          $ref: "#/components/responses/Error"
+  /api/assistant/auth/users/me:
+    get:
+      operationId: getAssistantUser
+      tags:
+        - assistant
+      summary: User of the ITMO AI assistant, including the consent time (FastAPI, no envelope)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  avatar_url:
+                    description: Observed only null
+                  google_id:
+                    description: Observed only null
+                  role:
+                    type: string
+                  consent_given_at:
+                    type: string
+                    format: date-time
+                  created_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - email
+                  - name
+                  - avatar_url
+                  - google_id
+                  - role
+                  - consent_given_at
+                  - created_at
+        default:
+          $ref: "#/components/responses/Error"
+  /api/assistant/chat/sessions:
+    get:
+      operationId: getAssistantSessions
+      tags:
+        - assistant
+      summary: Chat sessions with the AI assistant
+      parameters:
+        - name: workspace_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: From the Flagsmith flag my-itmo.web.ai-assistant.workspace-id
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    title:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - workspace_id
+                    - title
+                    - created_at
+                    - updated_at
+        default:
+          $ref: "#/components/responses/Error"
+  /api/assistant/chat/sessions/{sessionId}:
+    get:
+      operationId: getAssistantSession
+      tags:
+        - assistant
+      summary: One chat session with its messages
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      workspace_id:
+                        type: string
+                      title:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                    required:
+                      - id
+                      - workspace_id
+                      - title
+                      - created_at
+                      - updated_at
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        session_id:
+                          type: string
+                        role:
+                          type: string
+                        content:
+                          type: string
+                        tokens_used:
+                          type: integer
+                        sources:
+                          description: Observed only null
+                        created_at:
+                          type: string
+                          format: date-time
+                      required:
+                        - id
+                        - session_id
+                        - role
+                        - content
+                        - tokens_used
+                        - sources
+                        - created_at
+                required:
+                  - session
+                  - messages
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/v2/requests/my-tasks:
+    get:
+      operationId: getMyRequestTasksV2
+      tags:
+        - requests
+      summary: Requests waiting for the student's action (new request service)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/v2/requests/observed:
+    get:
+      operationId: getObservedRequestsV2
+      tags:
+        - requests
+      summary: Requests the user observes, paged
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              description: Observed empty
+                          totalElements:
+                            type: integer
+                          totalPages:
+                            type: integer
+                          page:
+                            type: integer
+                          size:
+                            type: integer
+                        required:
+                          - items
+                          - totalElements
+                          - totalPages
+                          - page
+                          - size
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/v2/requests/observed/types:
+    get:
+      operationId: getObservedRequestTypesV2
+      tags:
+        - requests
+      summary: Form types among observed requests
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty
+                        items: {}
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/v2/tasks:
+    get:
+      operationId: getRequestTasksV2
+      tags:
+        - requests
+      summary: Review tasks of the user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/v2/tasks/mine/request-ids:
+    get:
+      operationId: getMyTaskRequestIdsV2
+      tags:
+        - requests
+      summary: Ids of requests that have a task for the user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty
+                        items:
+                          type:
+                            - integer
+                            - string
+        default:
+          $ref: "#/components/responses/Error"
+  /api/services/checklist/bypass:
+    get:
+      operationId: getChecklistViaPortal
+      tags:
+        - checklist
+      summary: Clearance checklist through the portal proxy (same as checklist.itmo.su /api/v1/bypass)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          student:
+                            type: array
+                            items:
+                              description: Observed empty
+                          departments:
+                            type: array
+                            items:
+                              description: Observed empty
+                        required:
+                          - student
+                          - departments
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/personal/open_form:
+    get:
+      operationId: getSportOpenForm
+      tags:
+        - sport
+      summary: Saved open-class questionnaire for a section; null when not filled
+      parameters:
+        - name: section
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: section_id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type:
+                          - object
+                          - "null"
+                        description: Observed null; the site prefills school_name, rank_id, comment, achievements
+                        properties:
+                          school_name:
+                            type:
+                              - string
+                              - "null"
+                          rank_id:
+                            type:
+                              - integer
+                              - "null"
+                          comment:
+                            type:
+                              - string
+                              - "null"
+                          achievements:
+                            type:
+                              - string
+                              - "null"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/my/{requestId}/download:
+    get:
+      operationId: downloadMyRequest
+      tags:
+        - requests
+      summary: Printable PDF of a filed request (the application itself, not the issued certificate)
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         default:
           $ref: "#/components/responses/Error"
 components:

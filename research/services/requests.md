@@ -41,7 +41,7 @@
 | POST | `/api/requests/send` | Подать заявку; проверено 2026-10-05 на шаблоне справки 2706 и откатано отменой | проверено |
 | GET | `/api/requests/my` | Свои заявки: `id`, `name`, `notice`, `status`, `status_name`, `template_id`, `created_at`, `updated_at` | проверено |
 | GET | `/api/requests/my/{requestId}` | Детали заявки: введённые поля, статус, файлы для печати | проверено |
-| GET | `/api/requests/my/{requestId}/download` | PDF поданного заявления (GET снят: `application/pdf`) | сайт |
+| GET | `/api/requests/my/{requestId}/download` | PDF поданного заявления | проверено |
 | DELETE | `/api/requests/my/{requestId}` | Отозвать заявку, если она не обработана и не отклонена; необратимо; проверено 2026-10-05 | проверено |
 | GET | `/api/requests/file/{fileId}` | Файл-приложение шаблона (`template_files[].file_id`), ссылка в форме | сайт |
 | GET | `/api/requests/files/my/{data}` | Файл, загруженный в поле поданной заявки (`entered_fields[].data`) | сайт |
@@ -67,7 +67,7 @@
 | GET | `/api/requests/v2/requests/{id}/files/{variable}` | Готовый файл (подписанная справка): `{base64Content, contentType, filename}` | сайт |
 | GET | `/api/requests/v2/platform-roles/me` | Роль в платформе: `{userId, role, explicit}` (GET снят) | сайт |
 | GET | `/api/requests/v2/requests/task-counts` | Счётчики задач: `{ownRequestTasks, assignedRequestTasks}` | проверено |
-| GET | `/api/requests/v2/tasks/mine/request-ids` | Заявки, где у пользователя есть задача (GET снят: пустой массив) | сайт |
+| GET | `/api/requests/v2/tasks/mine/request-ids` | Заявки, где у пользователя есть задача | проверено |
 | GET | `/api/requests/v2/tasks/mine/by-request/{id}` | Задача пользователя по заявке | сайт |
 | POST | `/api/requests/v2/tasks/{id}/complete` | Выполнить задачу процесса (исполнитель или согласующий) | сайт |
 

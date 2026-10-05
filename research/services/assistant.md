@@ -23,10 +23,10 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/api/assistant/auth/users/me` | Пользователь ассистента: `id`, `email`, `name`, `avatar_url`, `google_id`, `role`, `consent_given_at`, `created_at` (GET снят) | сайт |
+| GET | `/api/assistant/auth/users/me` | Пользователь ассистента: `id`, `email`, `name`, `avatar_url`, `google_id`, `role`, `consent_given_at`, `created_at` | проверено |
 | PUT | `/api/assistant/auth/users/me/consent` | Дать согласие: `{accepted: true}` | сайт |
-| GET | `/api/assistant/chat/sessions?workspace_id&skip&limit` | Список сессий постранично (GET снят без `workspace_id`: `{detail: "workspace_id is required"}`) | сайт |
-| GET | `/api/assistant/chat/sessions/{id}` | История сессии: `{messages[]}` | сайт |
+| GET | `/api/assistant/chat/sessions?workspace_id&skip&limit` | Список сессий постранично (GET снят без `workspace_id`: `{detail: "workspace_id is required"}`) | проверено |
+| GET | `/api/assistant/chat/sessions/{id}` | История сессии: `{messages[]}` | проверено |
 | DELETE | `/api/assistant/chat/sessions/{id}` | Удалить сессию | сайт |
 | POST | `/api/assistant/chat` | Отправить сообщение, ответ потоком SSE | сайт |
 | POST | `/api/assistant/chat/messages/{id}/feedback` | Оценка ответа: `{rating: "up" или "down", category?, comment?}` | сайт |
@@ -63,6 +63,11 @@
 `my-itmo.web.ai-assistant.enabled`, `.workspace-id`, `.feedback-tags`, `.quick-actions`, `.thoughts.enabled`,
 `.thoughts.tools-enabled`, `.thoughts.animation`, `.thoughts.show-after-response`, `.token-usage.enabled`,
 `.token-usage.format` (по умолчанию `compact`).
+
+Окружение Flagsmith (`FLAGSMITH_API_URL=https://flagsmith.itmo.pro`, id окружения) зашито в бандл сайта.
+Проверено 2026-10-05: окружение читается без авторизации (`GET https://flagsmith.itmo.pro/api/v1/flags/` с
+заголовком `X-Environment-Key`), среди флагов есть и `workspace-id`. Значение `workspace_id` в этих заметках не
+приводится. Через него `GET /api/assistant/chat/sessions` отдаёт реальный список сессий (проверено).
 
 ### Прочее
 

@@ -29,7 +29,7 @@
 | GET | `/api/finances/scholarship/account` | Назначенные стипендии: `sum`, `payment_items[] {date_start, date_end, ...}` | проверено |
 | GET | `https://scholarship.itmo.pro/api/v1/income?to&from` | Выплаты за период в приложении | приложение |
 | GET | `https://scholarship.itmo.pro/api/v1/account` | Назначенные стипендии в приложении | приложение |
-| GET | `https://scholarship.itmo.pro/api/v1/form` | Форма обучения (бюджет или договор), ключ `budget_or_contract` | приложение |
+| GET | `https://scholarship.itmo.pro/api/v1/form` | Форма обучения (бюджет или договор), ключ `budget_or_contract` | проверено |
 
 ### Оплата обучения
 
