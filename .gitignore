@@ -8,3 +8,4 @@ vibe/
 *.har
 coverage/
 .DS_Store
+research/private/
