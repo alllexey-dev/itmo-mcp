@@ -52,7 +52,7 @@ describe("itmo-mcp server", () => {
 
     const { tools } = await client.listTools();
 
-    expect(tools.length).toBe(19);
+    expect(tools.length).toBe(25);
     for (const tool of tools) {
       expect(tool.annotations?.readOnlyHint, tool.name).toBe(true);
       expect(tool.annotations?.destructiveHint, tool.name).toBe(false);

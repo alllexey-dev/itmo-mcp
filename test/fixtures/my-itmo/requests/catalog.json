@@ -1,0 +1,87 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "name": "synthetic-1",
+      "color": "100002",
+      "icon": "synthetic-3",
+      "order": 1004,
+      "requests": [
+        {
+          "id": 1005,
+          "name": "synthetic-6",
+          "category_id": 1007,
+          "type": null
+        },
+        {
+          "id": 1008,
+          "name": "synthetic-9",
+          "category_id": 1010,
+          "type": null
+        },
+        {
+          "id": 1011,
+          "name": "synthetic-12",
+          "category_id": 1013,
+          "type": null
+        }
+      ]
+    },
+    {
+      "id": 1014,
+      "name": "synthetic-15",
+      "color": "100016",
+      "icon": "synthetic-17",
+      "order": 1018,
+      "requests": [
+        {
+          "id": 1019,
+          "name": "synthetic-20",
+          "category_id": 1021,
+          "type": "synthetic-22"
+        },
+        {
+          "id": 1023,
+          "name": "synthetic-24",
+          "category_id": 1025,
+          "type": "synthetic-26"
+        },
+        {
+          "id": 1027,
+          "name": "synthetic-28",
+          "category_id": 1029,
+          "type": "synthetic-30"
+        }
+      ]
+    },
+    {
+      "id": 1031,
+      "name": "synthetic-32",
+      "color": "100033",
+      "icon": "synthetic-34",
+      "order": null,
+      "requests": [
+        {
+          "id": 1035,
+          "name": "synthetic-36",
+          "category_id": 1037,
+          "type": "synthetic-38"
+        },
+        {
+          "id": 1039,
+          "name": "synthetic-40",
+          "category_id": 1041,
+          "type": "synthetic-42"
+        },
+        {
+          "id": 1043,
+          "name": "synthetic-44",
+          "category_id": 1045,
+          "type": "synthetic-46"
+        }
+      ]
+    }
+  ]
+}

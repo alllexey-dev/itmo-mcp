@@ -7,3 +7,4 @@ vibe/
 .refresh-token
 *.har
 coverage/
+.DS_Store

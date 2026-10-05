@@ -1,0 +1,19 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "room_id": 1000,
+      "room_name": "synthetic-1",
+      "group": {
+        "group_id": 1002,
+        "group_name": "synthetic-3",
+        "can_book_unconfirmed": false
+      },
+      "category": {
+        "category_id": 1004,
+        "category_name": "synthetic-5"
+      }
+    }
+  ]
+}

@@ -36,9 +36,17 @@ export function authorizedFetch(
   };
   return async (request) => {
     const authorization = await credential.current();
-    const response = await send(request.clone(), authorization);
+    let response = await send(request.clone(), authorization);
+    // ITMO services return sporadic 5xx; repeating a read is safe, repeating a write is not.
+    if (response.status >= 500 && request.method === "GET") {
+      await response.body?.cancel();
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      response = await send(request.clone(), authorization);
+    }
     if (response.status !== 401) return response;
     await response.body?.cancel();
     return send(request, await credential.rejected(authorization));
   };
 }
+
+const RETRY_DELAY_MS = 300;

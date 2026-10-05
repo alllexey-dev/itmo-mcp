@@ -1,0 +1,77 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "fields_data": [
+      {
+        "default_value": "100000",
+        "dependent_field_id": 1001,
+        "dictionary_id": 1002,
+        "init_dictionary": {
+          "id": "100003",
+          "text": "synthetic-4"
+        },
+        "disabled_field_flag": false,
+        "field_id": 1005,
+        "field_name": "synthetic-6",
+        "field_note": null,
+        "field_size": null,
+        "field_type": "synthetic-7",
+        "multiple_choice": false,
+        "multiple_field_data": [],
+        "multiple_field_max_block": null,
+        "required_field_flag": true,
+        "show_condition_flag": true
+      },
+      {
+        "default_value": "100008",
+        "dependent_field_id": null,
+        "dictionary_id": 1009,
+        "init_dictionary": {
+          "id": "100010",
+          "text": "100011"
+        },
+        "disabled_field_flag": false,
+        "field_id": 1012,
+        "field_name": "synthetic-13",
+        "field_note": null,
+        "field_size": null,
+        "field_type": "synthetic-14",
+        "multiple_choice": false,
+        "multiple_field_data": [],
+        "multiple_field_max_block": null,
+        "required_field_flag": true,
+        "show_condition_flag": true
+      },
+      {
+        "default_value": null,
+        "dependent_field_id": null,
+        "dictionary_id": 1015,
+        "init_dictionary": null,
+        "disabled_field_flag": false,
+        "field_id": 1016,
+        "field_name": "synthetic-17",
+        "field_note": null,
+        "field_size": null,
+        "field_type": "synthetic-18",
+        "multiple_choice": false,
+        "multiple_field_data": [],
+        "multiple_field_max_block": null,
+        "required_field_flag": true,
+        "show_condition_flag": true
+      }
+    ],
+    "responsible_units": [
+      {
+        "dep_link": "synthetic-19",
+        "dep_name": "synthetic-20"
+      }
+    ],
+    "template_description": "synthetic-21",
+    "template_files": [],
+    "template_name": "synthetic-22",
+    "unique_flag": false,
+    "user_can_apply_now": true,
+    "user_cannot_apply_now_reason": null
+  }
+}

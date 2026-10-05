@@ -17,6 +17,12 @@ const specs = {
   bars: loadSpecValidator(new URL("../openapi/bars.yaml", import.meta.url).pathname),
 };
 const checked = new Set<string>();
+// Operations that change data are never called here; form_update is a side-effect free POST but needs a form state.
+const WRITE_OPERATIONS = new Set([
+  "signInSportLessons", "signOutSportLessons", "signInSportLessonGroup", "signOutSportLessonGroup",
+  "signInSportCompetition", "signOutSportCompetition", "createRoomBooking", "cancelRoomBooking",
+  "updateRequestForm", "sendRequest", "cancelMyRequest",
+]);
 let failures = 0;
 
 async function check<D>(
@@ -97,6 +103,35 @@ await check("my", "getMyRoomBookings", my.GET("/api/booking/bookings/my"));
 await check("my", "getCurrentQueueEntries", my.GET("/api/queues/current"));
 await check("my", "getArchivedQueueEntries", my.GET("/api/queues/archive"));
 await check("my", "getElectionAvailability", my.GET("/api/election/students/availability"));
+await check("my", "getSportCompetitionLimits", my.GET("/api/sport/competitions/list/limits"));
+const groups = await check("my", "getBookingRoomGroups", my.GET("/api/booking/dictionary/rooms/groups"));
+const groupId = groups?.result?.[0]?.group_id;
+if (groupId) {
+  const categories = await check("my", "getBookingRoomCategories", my.GET("/api/booking/dictionary/rooms/categories", { params: { query: { groupId } } }));
+  const categoryId = categories?.result?.[0]?.category_id;
+  if (categoryId) {
+    await check("my", "getBookingRooms", my.GET("/api/booking/rooms/roomsInCategory", { params: { query: { categoryId } } }));
+    await check("my", "getBookingRoomBookings", my.GET("/api/booking/rooms/roomBookings", {
+      params: { query: { categoryId, date: to, status: [1, 2, 5, 6, 8] } },
+    }));
+  }
+}
+await check("my", "searchBookingRooms", my.GET("/api/booking/rooms/byName", { params: { query: { search: "1" } } }));
+await check("my", "getBookingUser", my.GET("/api/booking/users/status"));
+const catalog = await check("my", "getRequestCatalog", my.GET("/api/requests/all"));
+const templateId = catalog?.result?.flatMap((c) => c.requests).find((r) => /справка/i.test(r.name))?.id;
+if (templateId) {
+  const template = await check("my", "getRequestTemplate", my.GET("/api/requests/{templateId}", { params: { path: { templateId } } }));
+  const dictField = template?.result?.fields_data.find((f) => f.field_type === "dictionary" && f.dictionary_id && !f.dependent_field_id);
+  if (dictField?.dictionary_id) {
+    await check("my", "getRequestDictionary", my.GET("/api/requests/dict/{dictionaryId}", {
+      params: { path: { dictionaryId: dictField.dictionary_id }, query: { field: dictField.field_id } },
+    }));
+  }
+}
+const myRequests = await my.GET("/api/requests/my");
+const requestId = myRequests.data?.result?.[0]?.id;
+if (requestId) await check("my", "getMyRequest", my.GET("/api/requests/my/{requestId}", { params: { path: { requestId } } }));
 
 await check("bars", "getCurrentUser", bars.GET("/users/current_user/"));
 await check("bars", "getConfig", bars.GET("/config/"));
@@ -113,7 +148,10 @@ if (checkpointPlanId) {
 }
 
 const skipped = Object.entries(specs).flatMap(([name, spec]) =>
-  spec.operationIds().filter((id) => id !== "barsLogin" && !checked.has(`${name}:${id}`)).map((id) => `${name}:${id}`),
+  spec
+    .operationIds()
+    .filter((id) => id !== "barsLogin" && !WRITE_OPERATIONS.has(id) && !checked.has(`${name}:${id}`))
+    .map((id) => `${name}:${id}`),
 );
 if (skipped.length) console.log(`not checked (no data for this account): ${skipped.join(", ")}`);
 console.log(failures ? `${failures} operation(s) failed` : "all checked operations match the spec");

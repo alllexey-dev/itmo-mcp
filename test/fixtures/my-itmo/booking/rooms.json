@@ -1,0 +1,141 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "room_id": 1000,
+      "room_name": "synthetic-1",
+      "category": {
+        "category_id": 1002,
+        "category_name": "synthetic-3",
+        "min_days": null,
+        "max_days": null
+      },
+      "group": {
+        "group_id": 1004,
+        "group_name": "synthetic-5",
+        "can_book_unconfirmed": false
+      },
+      "room_number": "100006",
+      "building_id": 1007,
+      "address": "synthetic-8",
+      "area": "100009",
+      "floor": "100010",
+      "min_cap": 1011,
+      "max_cap": 1012,
+      "min_booking_days": 1013,
+      "max_booking_days": null,
+      "equipment": [
+        {
+          "equipment_id": 1014,
+          "equipment_name": "synthetic-15",
+          "count": 1016
+        },
+        {
+          "equipment_id": 1017,
+          "equipment_name": "synthetic-18",
+          "count": 1019
+        },
+        {
+          "equipment_id": 1020,
+          "equipment_name": "synthetic-21",
+          "count": 1022
+        }
+      ],
+      "photo_link": "synthetic-23",
+      "photo_link_extension": "synthetic-24",
+      "photo_link_small": "synthetic-25",
+      "photo_link_small_extension": "synthetic-26"
+    },
+    {
+      "room_id": 1027,
+      "room_name": "synthetic-28",
+      "category": {
+        "category_id": 1029,
+        "category_name": "synthetic-30",
+        "min_days": null,
+        "max_days": null
+      },
+      "group": {
+        "group_id": 1031,
+        "group_name": "synthetic-32",
+        "can_book_unconfirmed": false
+      },
+      "room_number": "100033",
+      "building_id": 1034,
+      "address": "synthetic-35",
+      "area": "synthetic-36",
+      "floor": "100037",
+      "min_cap": 1038,
+      "max_cap": 1039,
+      "min_booking_days": 1040,
+      "max_booking_days": null,
+      "equipment": [
+        {
+          "equipment_id": 1041,
+          "equipment_name": "synthetic-42",
+          "count": 1043
+        },
+        {
+          "equipment_id": 1044,
+          "equipment_name": "synthetic-45",
+          "count": 1046
+        },
+        {
+          "equipment_id": 1047,
+          "equipment_name": "synthetic-48",
+          "count": 1049
+        }
+      ],
+      "photo_link": "synthetic-50",
+      "photo_link_extension": "synthetic-51",
+      "photo_link_small": "synthetic-52",
+      "photo_link_small_extension": "synthetic-53"
+    },
+    {
+      "room_id": 1054,
+      "room_name": "synthetic-55",
+      "category": {
+        "category_id": 1056,
+        "category_name": "synthetic-57",
+        "min_days": null,
+        "max_days": null
+      },
+      "group": {
+        "group_id": 1058,
+        "group_name": "synthetic-59",
+        "can_book_unconfirmed": false
+      },
+      "room_number": "100060",
+      "building_id": 1061,
+      "address": "synthetic-62",
+      "area": "synthetic-63",
+      "floor": "100064",
+      "min_cap": 1065,
+      "max_cap": 1066,
+      "min_booking_days": 1067,
+      "max_booking_days": null,
+      "equipment": [
+        {
+          "equipment_id": 1068,
+          "equipment_name": "synthetic-69",
+          "count": 1070
+        },
+        {
+          "equipment_id": 1071,
+          "equipment_name": "synthetic-72",
+          "count": 1073
+        },
+        {
+          "equipment_id": 1074,
+          "equipment_name": "synthetic-75",
+          "count": 1076
+        }
+      ],
+      "photo_link": "synthetic-77",
+      "photo_link_extension": "synthetic-78",
+      "photo_link_small": "synthetic-79",
+      "photo_link_small_extension": "synthetic-80"
+    }
+  ]
+}

@@ -104,3 +104,23 @@ describe("createMyItmoClient", () => {
     expect(await result("getMyRoomBookings", client.GET("/api/booking/bookings/my"))).toEqual({ count: 0, list: [] });
   });
 });
+
+describe("transient server errors", () => {
+  it("retries a GET once after a 5xx", async () => {
+    let n = 0;
+    const { client, fetchFn } = setup(() => (++n === 1 ? json({}, 500) : json(fixture("requests/my.json"))));
+
+    await result("getMyRequests", client.GET("/api/requests/my"));
+
+    expect(fetchFn.calls).toHaveLength(2);
+  });
+
+  it("never repeats a write", async () => {
+    const { client, fetchFn } = setup(() => json({ error_code: 1, error_message: "boom" }, 500));
+
+    await expect(
+      result("signInSportLessons", client.POST("/api/sport/sign/schedule/lessons", { body: [1] })),
+    ).rejects.toMatchObject({ status: 500 });
+    expect(fetchFn.calls).toHaveLength(1);
+  });
+});

@@ -1,0 +1,48 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "0": {
+      "competition_id": 1216,
+      "limit": 1217,
+      "available": 1218,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    },
+    "1": {
+      "competition_id": 1219,
+      "limit": 1220,
+      "available": 1221,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    },
+    "2": {
+      "competition_id": 1222,
+      "limit": 1223,
+      "available": 1224,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    },
+    "3": {
+      "competition_id": 1225,
+      "limit": 1226,
+      "available": 1227,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    },
+    "4": {
+      "competition_id": 1228,
+      "limit": 1229,
+      "available": 1230,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    },
+    "5": {
+      "competition_id": 1210,
+      "limit": 1211,
+      "available": 1212,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    },
+    "6": {
+      "competition_id": 1213,
+      "limit": 1214,
+      "available": 1215,
+      "date_start": "2026-09-01T10:00:00+03:00"
+    }
+  }
+}

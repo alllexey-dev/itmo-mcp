@@ -568,6 +568,330 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sport/sign/schedule/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enroll in single free-attendance sports lessons (section_level 1)
+         * @description Uses one enrollment attempt per lesson. A missed lesson burns the attempt; withdraw before it starts.
+         */
+        post: operations["signInSportLessons"];
+        /** Withdraw from single sports lessons */
+        delete: operations["signOutSportLessons"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sport/sign/schedule/lesson_groups/{lessonGroupId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join a whole-semester sports group (section_level 2-4)
+         * @description Open classes (type_id 1 in a selection-based section) also send a questionnaire body; this contract omits it.
+         */
+        post: operations["signInSportLessonGroup"];
+        /** Leave a whole-semester sports group */
+        delete: operations["signOutSportLessonGroup"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sport/competitions/list/limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Places per competition discipline, keyed by discipline id */
+        get: operations["getSportCompetitionLimits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sport/sign/competitions/{competitionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register for a competition; the body replaces the selected disciplines */
+        post: operations["signInSportCompetition"];
+        /** Withdraw from a competition */
+        delete: operations["signOutSportCompetition"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/dictionary/rooms/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Room groups (assembly halls, coworkings, general classroom pool...) */
+        get: operations["getBookingRoomGroups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/dictionary/rooms/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Categories (usually buildings or spaces) of a room group with allowed booking day range */
+        get: operations["getBookingRoomCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/rooms/roomsInCategory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rooms of a category with capacity and equipment */
+        get: operations["getBookingRooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/rooms/roomBookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Existing bookings of every room in a category on one date
+         * @description Contains other people's names and ISU numbers; never pass them through.
+         */
+        get: operations["getBookingRoomBookings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/rooms/byName": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find bookable rooms by name or number */
+        get: operations["searchBookingRooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/users/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contact phone used to prefill booking forms */
+        get: operations["getBookingUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/bookings/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Book a room (array with exactly one booking) */
+        post: operations["createRoomBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/booking/bookings/{bookingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel an own booking that has not started yet */
+        delete: operations["cancelRoomBooking"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Request and certificate templates grouped by category */
+        get: operations["getRequestCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/{templateId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Form schema of a request template */
+        get: operations["getRequestTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/dict/{dictionaryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Options of a dictionary field */
+        get: operations["getRequestDictionary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/form_update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recompute which fields are visible after a change (no side effects) */
+        post: operations["updateRequestForm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a request (creates real work for a university office)
+         * @description Value encoding by field type: dictionary - option id (comma-joined for multiple choice);
+         *     date - DD.MM.YYYY; date_time - DD.MM.YYYY HH:mm; other - plain string.
+         *     Validation errors come back as `result.error_list`.
+         */
+        post: operations["sendRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/my/{requestId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Details of a submitted request */
+        get: operations["getMyRequest"];
+        put?: never;
+        post?: never;
+        /** Cancel a submitted request that is not processed or rejected yet (irreversible) */
+        delete: operations["cancelMyRequest"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1120,8 +1444,9 @@ export interface components {
             available?: number | null;
             registration_link?: string | null;
             disciplines?: {
-                id?: number;
-                name?: string;
+                id: number;
+                name: string;
+                /** @description Greater than 0 when the student is registered */
                 signed?: number;
             }[];
             sign_in_info?: {
@@ -1129,6 +1454,120 @@ export interface components {
                 unavailable_reasons?: unknown;
             };
             signed?: number;
+        };
+        IdList: number[];
+        IdListResult: components["schemas"]["ResultResponse"] & {
+            result?: number[] | null;
+        };
+        BookingStatus: {
+            /** @description 1 approved, 2 sent, 3 rejected, 4 draft, 5 needs editing, 6 under review, 7 cancelled, 8 done */
+            status_id?: number;
+            status_name?: string;
+        };
+        BookingRoomGroup: {
+            group_id: number;
+            group_name: string;
+            can_book_unconfirmed?: boolean | null;
+        };
+        BookingRoomCategory: {
+            category_id: number;
+            category_name: string;
+            /** @description Earliest bookable date, days from today */
+            min_days?: number | null;
+            /** @description Latest bookable date, days from today */
+            max_days?: number | null;
+        };
+        BookingRoom: {
+            room_id: number;
+            room_name?: string | null;
+            room_number?: string | null;
+            address?: string | null;
+            floor?: string | null;
+            area?: string | null;
+            building_id?: number | null;
+            min_cap?: number | null;
+            max_cap?: number | null;
+            equipment?: {
+                equipment_id?: number;
+                equipment_name?: string;
+                count?: number;
+            }[] | null;
+            category?: {
+                category_id?: number;
+                category_name?: string;
+            };
+            group?: components["schemas"]["BookingRoomGroup"];
+        };
+        NewRoomBooking: {
+            name: string;
+            additional_info?: string | null;
+            participants: number;
+            contact_phone: string;
+            event_id?: number | null;
+            co_bookers?: number[];
+            /** @description Local Moscow time "YYYY-MM-DD HH:mm" */
+            start_datetime: string;
+            /** @description Local Moscow time "YYYY-MM-DD HH:mm" */
+            end_datetime: string;
+            room_id: number;
+            equipment?: Record<string, never>[];
+            tech_support?: boolean;
+        };
+        RequestOption: {
+            id: string | number;
+            text: string;
+        };
+        RequestTemplate: {
+            template_name: string;
+            /** @description HTML */
+            template_description?: string | null;
+            template_files?: {
+                file_id?: number | string;
+                file_name?: string;
+            }[] | null;
+            responsible_units?: {
+                dep_name?: string;
+                dep_link?: string | null;
+            }[] | null;
+            unique_flag?: boolean | null;
+            user_can_apply_now?: boolean | null;
+            user_cannot_apply_now_reason?: string | null;
+            fields_data: components["schemas"]["RequestField"][];
+        };
+        RequestField: {
+            field_id: number;
+            field_name: string;
+            /** @description text, number, date, date_time, dictionary, file or multiple_field */
+            field_type: string;
+            required_field_flag?: boolean | null;
+            disabled_field_flag?: boolean | null;
+            /** @description Visible initially */
+            show_condition_flag?: boolean | null;
+            dictionary_id?: number | null;
+            dependent_field_id?: number | null;
+            multiple_choice?: boolean | null;
+            default_value?: unknown;
+            init_dictionary?: components["schemas"]["RequestOption"] | null;
+            field_note?: string | null;
+        };
+        RequestDetails: {
+            request_id: number;
+            request_name?: string;
+            request_state?: string | null;
+            request_status?: string | null;
+            /** @description processed, rejected or other */
+            request_status_tag?: string | null;
+            request_create_date?: string | null;
+            entered_fields?: {
+                field_id?: number;
+                name?: string;
+                type?: string;
+                data?: string | null;
+            }[];
+            print_files?: {
+                print_file_name?: string;
+                print_file_path?: string;
+            }[] | null;
         };
     };
     responses: {
@@ -1143,6 +1582,9 @@ export interface components {
         };
     };
     parameters: {
+        LessonGroupId: number;
+        CompetitionId: number;
+        RequestId: number;
         DateStart: string;
         DateEnd: string;
     };
@@ -1985,6 +2427,620 @@ export interface operations {
                             semester?: number;
                         } | null;
                     };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    signInSportLessons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdList"];
+            };
+        };
+        responses: {
+            /** @description Enrolled lesson ids */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdListResult"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    signOutSportLessons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdList"];
+            };
+        };
+        responses: {
+            /** @description Withdrawn lesson ids */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdListResult"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    signInSportLessonGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lessonGroupId: components["parameters"]["LessonGroupId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Joined */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    signOutSportLessonGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lessonGroupId: components["parameters"]["LessonGroupId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Left */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getSportCompetitionLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Limits */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            [key: string]: {
+                                competition_id?: number;
+                                limit?: number | null;
+                                available?: number | null;
+                                /** Format: date-time */
+                                date_start?: string;
+                            };
+                        } | null;
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    signInSportCompetition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                competitionId: components["parameters"]["CompetitionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdList"];
+            };
+        };
+        responses: {
+            /** @description Registered */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    signOutSportCompetition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                competitionId: components["parameters"]["CompetitionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Withdrawn */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getBookingRoomGroups: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Groups */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: components["schemas"]["BookingRoomGroup"][];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getBookingRoomCategories: {
+        parameters: {
+            query: {
+                groupId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Categories */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: components["schemas"]["BookingRoomCategory"][];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getBookingRooms: {
+        parameters: {
+            query: {
+                categoryId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rooms */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: components["schemas"]["BookingRoom"][];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getBookingRoomBookings: {
+        parameters: {
+            query: {
+                categoryId: number;
+                date: string;
+                /** @description Booking status ids to include; the portal sends 1, 2, 5, 6, 8 */
+                status?: number[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rooms with bookings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            room_id: number;
+                            room_name?: string | null;
+                            room_number?: string | null;
+                            address?: string | null;
+                            bookings: {
+                                booking_id: number;
+                                booking_name?: string | null;
+                                /** Format: date-time */
+                                start_datetime: string;
+                                /** Format: date-time */
+                                end_datetime: string;
+                                owner_isu?: number | null;
+                                owner_fio?: string | null;
+                                status?: components["schemas"]["BookingStatus"];
+                            }[];
+                        }[];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    searchBookingRooms: {
+        parameters: {
+            query: {
+                search: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rooms */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            room_id: number;
+                            room_name?: string | null;
+                            group?: components["schemas"]["BookingRoomGroup"];
+                            category?: {
+                                category_id?: number;
+                                category_name?: string;
+                            };
+                        }[];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getBookingUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            phone_number?: string | null;
+                        } | null;
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    createRoomBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewRoomBooking"][];
+            };
+        };
+        responses: {
+            /** @description Created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    cancelRoomBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookingId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getRequestCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalog */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            id: number;
+                            name: string;
+                            order?: number | null;
+                            requests: {
+                                id: number;
+                                name: string;
+                                category_id?: number;
+                                type?: string | null;
+                            }[];
+                        }[];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getRequestTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                templateId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Template */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: components["schemas"]["RequestTemplate"];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getRequestDictionary: {
+        parameters: {
+            query?: {
+                field?: number;
+                q?: string;
+                /** @description Value of the field this dictionary depends on */
+                dep?: string;
+            };
+            header?: never;
+            path: {
+                dictionaryId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: components["schemas"]["RequestOption"][];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    updateRequestForm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    changed_field: number | string;
+                    current_values: {
+                        field_id: number | string;
+                        field_type?: string;
+                        value: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Visibility changes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            show?: (number | string)[];
+                            hide?: (number | string)[];
+                        } | null;
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    sendRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Template id */
+                    request_id: number;
+                    values: {
+                        field_id: number | string;
+                        field_type: string;
+                        value: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Submitted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: {
+                            reqId?: number | string | null;
+                            error_list?: {
+                                field_id?: number | string;
+                                error_text?: string;
+                            }[];
+                        } | null;
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getMyRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: components["parameters"]["RequestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"] & {
+                        result?: components["schemas"]["RequestDetails"];
+                    };
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    cancelMyRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requestId: components["parameters"]["RequestId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultResponse"];
                 };
             };
             default: components["responses"]["Error"];

@@ -1,0 +1,114 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "room_id": 1000,
+      "room_name": "synthetic-1",
+      "room_number": "100002",
+      "address": "synthetic-3",
+      "bookings": [
+        {
+          "booking_id": 1004,
+          "booking_name": "synthetic-5",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1006,
+          "owner_fio": "synthetic-7",
+          "status": {
+            "status_id": 1008,
+            "status_name": "synthetic-9"
+          }
+        }
+      ]
+    },
+    {
+      "room_id": 1010,
+      "room_name": "synthetic-11",
+      "room_number": "100012",
+      "address": "synthetic-13",
+      "bookings": [
+        {
+          "booking_id": 1014,
+          "booking_name": "synthetic-15",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1016,
+          "owner_fio": "synthetic-17",
+          "status": {
+            "status_id": 1018,
+            "status_name": "synthetic-19"
+          }
+        },
+        {
+          "booking_id": 1020,
+          "booking_name": "synthetic-21",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1022,
+          "owner_fio": "synthetic-23",
+          "status": {
+            "status_id": 1024,
+            "status_name": "synthetic-25"
+          }
+        },
+        {
+          "booking_id": 1026,
+          "booking_name": "synthetic-27",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1028,
+          "owner_fio": "synthetic-29",
+          "status": {
+            "status_id": 1030,
+            "status_name": "synthetic-31"
+          }
+        }
+      ]
+    },
+    {
+      "room_id": 1032,
+      "room_name": "synthetic-33",
+      "room_number": "100034",
+      "address": "synthetic-35",
+      "bookings": [
+        {
+          "booking_id": 1036,
+          "booking_name": "synthetic-37",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1038,
+          "owner_fio": "synthetic-39",
+          "status": {
+            "status_id": 1040,
+            "status_name": "synthetic-41"
+          }
+        },
+        {
+          "booking_id": 1042,
+          "booking_name": "synthetic-43",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1044,
+          "owner_fio": "synthetic-45",
+          "status": {
+            "status_id": 1046,
+            "status_name": "synthetic-47"
+          }
+        },
+        {
+          "booking_id": 1048,
+          "booking_name": "synthetic-49",
+          "start_datetime": "2026-09-01T10:00:00+03:00",
+          "end_datetime": "2026-09-01T10:00:00+03:00",
+          "owner_isu": 1050,
+          "owner_fio": "synthetic-51",
+          "status": {
+            "status_id": 1052,
+            "status_name": "synthetic-53"
+          }
+        }
+      ]
+    }
+  ]
+}

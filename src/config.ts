@@ -16,6 +16,7 @@ const EnvSchema = z.object({
   ITMO_MCP_STATE_DIR: optionalText,
   ITMO_MCP_HTTP_ALLOWED_HOSTS: optionalText,
   ITMO_MCP_HTTP_TOKEN: optionalText,
+  ITMO_MCP_ENABLE_WRITES: optionalText,
 });
 
 export interface Credentials {
@@ -32,6 +33,8 @@ export interface Config {
   allowedHosts: string[];
   /** Optional bearer token required in HTTP mode. */
   httpToken?: string;
+  /** Registers tools that change data (enroll, book, submit). Off by default. */
+  writesEnabled: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -49,6 +52,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       .map((host) => host.trim())
       .filter(Boolean),
     httpToken: parsed.ITMO_MCP_HTTP_TOKEN,
+    writesEnabled: ["1", "true", "yes"].includes(parsed.ITMO_MCP_ENABLE_WRITES?.toLowerCase() ?? ""),
   };
 }
 

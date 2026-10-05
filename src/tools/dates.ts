@@ -42,3 +42,40 @@ const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 export function weekday(date: string): string {
   return WEEKDAYS[new Date(`${date}T00:00:00Z`).getUTCDay()] ?? "";
 }
+
+/** Moscow has been UTC+3 without daylight saving since 2014. */
+export const MOSCOW_OFFSET = "+03:00";
+
+export const hourMinute = z
+  .string()
+  .regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Use HH:mm")
+  .describe("Local Moscow time, HH:mm");
+
+/** Date and HH:mm of an instant in Moscow time. */
+export function moscowDateTime(iso: string): { date: string; time: string } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(iso));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return { date: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}` };
+}
+
+export function minutesOf(time: string): number {
+  const [hours, minutes] = time.split(":").map(Number);
+  return (hours ?? 0) * 60 + (minutes ?? 0);
+}
+
+export function timeOf(minutes: number): string {
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
+/** Instant of a Moscow-local date and time. */
+export function moscowInstant(date: string, time: string): Date {
+  return new Date(`${date}T${time.padStart(5, "0")}:00${MOSCOW_OFFSET}`);
+}

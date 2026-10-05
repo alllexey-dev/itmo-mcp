@@ -1,0 +1,24 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "category_id": 1000,
+      "category_name": "synthetic-1",
+      "min_days": 1002,
+      "max_days": null
+    },
+    {
+      "category_id": 1003,
+      "category_name": "synthetic-4",
+      "min_days": 1005,
+      "max_days": null
+    },
+    {
+      "category_id": 1006,
+      "category_name": "synthetic-7",
+      "min_days": 1008,
+      "max_days": null
+    }
+  ]
+}

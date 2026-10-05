@@ -98,6 +98,7 @@ export function registerCampusTools(server: McpServer, deps: ToolDeps): void {
       run(async () => {
         const bookings = await result("getMyRoomBookings", deps.my.GET("/api/booking/bookings/my"));
         return bookings?.list?.map((b) => ({
+          booking_id: b.booking_id,
           name: b.name,
           start: b.start_datetime,
           end: b.end_datetime,
@@ -148,6 +149,7 @@ export function registerCampusTools(server: McpServer, deps: ToolDeps): void {
       run(async () => {
         const requests = await result("getMyRequests", deps.my.GET("/api/requests/my"));
         return requests?.map((r) => ({
+          request_id: r.id,
           name: r.name,
           status: r.status_name,
           notice: r.notice,

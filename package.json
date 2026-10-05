@@ -1,6 +1,6 @@
 {
   "name": "itmo-mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "MCP server for ITMO University student services: my.itmo.ru and bars.itmo.ru",
   "license": "MIT",
   "author": "alllexey",

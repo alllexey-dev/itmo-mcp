@@ -8,14 +8,15 @@ import { READ_ONLY, run } from "./format.js";
 
 type SportLesson = components["schemas"]["SportLesson"];
 
-const reasons = (value: unknown): string[] | undefined => {
+export const reasons = (value: unknown): string[] | undefined => {
   if (Array.isArray(value)) return value.map(String);
   if (value && typeof value === "object") return Object.values(value).map(String);
   return undefined;
 };
 
-const lessonView = (l: SportLesson) => ({
+export const lessonView = (l: SportLesson) => ({
   lesson_id: l.id,
+  kind: l.section_level === 1 ? "single lesson" : "semester group",
   start: l.date,
   end: l.date_end,
   section: l.section_name,

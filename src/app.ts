@@ -7,6 +7,7 @@ import { createBarsClient } from "./clients/bars.js";
 import { createMyItmoClient } from "./clients/my-itmo.js";
 import type { Config } from "./config.js";
 import type { FetchFn } from "./http.js";
+import { PendingActions } from "./tools/actions.js";
 import type { ToolDeps } from "./tools/deps.js";
 
 /** Wires authentication and API clients for one ITMO account; share it between MCP sessions. */
@@ -20,5 +21,6 @@ export function createToolDeps(config: Config, fetchFn: FetchFn = fetch): ToolDe
     bars: createBarsClient({ session: new BarsSession(sso, fetchFn), fetchFn }),
     isu: () => tokens.isu(),
     now: () => new Date(),
+    actions: config.writesEnabled ? new PendingActions() : undefined,
   };
 }

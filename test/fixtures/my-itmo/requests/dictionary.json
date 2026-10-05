@@ -1,0 +1,14 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": "100000",
+      "text": "synthetic-1"
+    },
+    {
+      "id": "100002",
+      "text": "synthetic-3"
+    }
+  ]
+}

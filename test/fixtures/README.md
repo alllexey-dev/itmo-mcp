@@ -14,6 +14,9 @@ All fixtures are synthetic. They contain no real names, ISU numbers or other per
   - `my-itmo/queues/archive.json`
   - `my-itmo/sport/competitions.json`
   - `my-itmo/election/availability.json`
+  - `my-itmo/booking/*.json`
+  - `my-itmo/requests/{catalog,template,dictionary,details}.json`
+  - `my-itmo/sport/competition-limits.json`
   - `bars/groups-live.json`
 
 Never commit raw captures. Run new ones through the sanitizer first.

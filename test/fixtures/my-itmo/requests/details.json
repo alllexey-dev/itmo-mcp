@@ -1,0 +1,38 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "entered_fields": [
+      {
+        "field_id": 1000,
+        "data": "synthetic-1",
+        "name": "synthetic-2",
+        "type": "synthetic-3"
+      },
+      {
+        "field_id": 1004,
+        "data": "100005",
+        "name": "synthetic-6",
+        "type": "synthetic-7"
+      },
+      {
+        "field_id": 1008,
+        "data": "synthetic-9",
+        "name": "synthetic-10",
+        "type": "synthetic-11"
+      }
+    ],
+    "print_files": [
+      {
+        "print_file_name": "synthetic-12",
+        "print_file_path": "100013"
+      }
+    ],
+    "request_create_date": "2026-09-01T10:00:38+03:00",
+    "request_id": 1014,
+    "request_name": "synthetic-15",
+    "request_state": "synthetic-16",
+    "request_status": "synthetic-17",
+    "request_status_tag": "synthetic-18"
+  }
+}

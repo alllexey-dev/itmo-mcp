@@ -2,6 +2,11 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AuthError } from "../auth/errors.js";
 import { ItmoApiError } from "../clients/errors.js";
 
+/** A request the tool refuses to carry out; the message explains why to the user. */
+export class ToolRefusal extends Error {
+  override readonly name = "ToolRefusal";
+}
+
 /** Drops null, undefined, empty strings, empty arrays and empty objects to keep tool output small. */
 export function compact(value: unknown): unknown {
   if (Array.isArray(value)) {
@@ -25,7 +30,10 @@ export function toolResult(data: unknown): CallToolResult {
 
 export function toolError(error: unknown): CallToolResult {
   const message =
-    error instanceof AuthError || error instanceof ItmoApiError || error instanceof RangeError
+    error instanceof AuthError ||
+    error instanceof ItmoApiError ||
+    error instanceof RangeError ||
+    error instanceof ToolRefusal
       ? error.message
       : `Unexpected error: ${error instanceof Error ? error.message : String(error)}`;
   return { content: [{ type: "text", text: message }], isError: true };
@@ -41,3 +49,6 @@ export async function run(body: () => Promise<unknown>): Promise<CallToolResult>
 }
 
 export const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
+
+/** Annotations of a preview tool: it only reads, the change happens in itmo_confirm_action. */
+export const PREVIEW = READ_ONLY;

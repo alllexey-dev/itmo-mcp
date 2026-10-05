@@ -1,0 +1,21 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "group_id": 1000,
+      "group_name": "synthetic-1",
+      "can_book_unconfirmed": false
+    },
+    {
+      "group_id": 1002,
+      "group_name": "synthetic-3",
+      "can_book_unconfirmed": false
+    },
+    {
+      "group_id": 1004,
+      "group_name": "synthetic-5",
+      "can_book_unconfirmed": true
+    }
+  ]
+}

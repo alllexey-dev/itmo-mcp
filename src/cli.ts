@@ -21,6 +21,7 @@ Credentials (environment, at least one):
 
 Other settings:
   ITMO_MCP_STATE_DIR             Where rotated tokens are kept (default ~/.config/itmo-mcp)
+  ITMO_MCP_ENABLE_WRITES         "true" adds tools that enroll, book and file requests (preview + confirm)
   ITMO_MCP_HTTP_TOKEN            Require "Authorization: Bearer <token>" in HTTP mode
   ITMO_MCP_HTTP_ALLOWED_HOSTS    Comma-separated Host header values accepted in HTTP mode
 `;
