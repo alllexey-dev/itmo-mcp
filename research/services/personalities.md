@@ -23,7 +23,7 @@
 |---|---|---|---|
 | GET | `/api/personalities/persons?q&limit&offset` | Поиск людей; `result {count, data[]}`, `count` - всего совпадений | проверено |
 | GET | `/api/personalities/persons/{isu}` | Публичная карточка по номеру ИСУ | проверено |
-| GET | `/api/personalities/persons/{isu}/activities?type&...` | Активности человека постранично (`count`, `data`), фильтр `type` | сайт |
+| GET | `/api/personalities/persons/{isu}/activities?type&...` | Активности человека постранично (`count`, `data`), фильтр `type` | проверено |
 | GET | `https://api.itmo.su/person/v1/persons?limit&q&offset` | Поиск в приложении | приложение |
 | GET | `https://api.itmo.su/person/v1/persons/{isu}` | Карточка в приложении | приложение |
 
@@ -41,6 +41,11 @@
 | Своя карточка | ISU текущего пользователя есть в claim `isu` токена ITMO.ID и в `eduPlanNew/programs.isu` |
 
 Полные схемы: `Person`, `PersonShort` в [../../openapi/my-itmo.yaml](../../openapi/my-itmo.yaml).
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

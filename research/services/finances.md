@@ -26,7 +26,7 @@
 |---|---|---|---|
 | GET | `/api/finances/scholarship/total?dateFrom&dateTo` | Суммы начислений по категориям за период; сайт вызывает и без параметров (вероятно, за всё время) | проверено |
 | GET | `/api/finances/scholarship/income` | Выплаты, по элементу на дату выплаты, с разбивкой | проверено |
-| GET | `/api/finances/scholarship/account` | Назначенные стипендии: `sum`, `payment_items[] {date_start, date_end, ...}` (GET снят: пустой массив) | сайт |
+| GET | `/api/finances/scholarship/account` | Назначенные стипендии: `sum`, `payment_items[] {date_start, date_end, ...}` | проверено |
 | GET | `https://scholarship.itmo.pro/api/v1/income?to&from` | Выплаты за период в приложении | приложение |
 | GET | `https://scholarship.itmo.pro/api/v1/account` | Назначенные стипендии в приложении | приложение |
 | GET | `https://scholarship.itmo.pro/api/v1/form` | Форма обучения (бюджет или договор), ключ `budget_or_contract` | приложение |
@@ -35,7 +35,7 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/api/finances/edupayments/availability` | Показывать ли раздел оплаты: `result` - boolean (GET снят) | сайт |
+| GET | `/api/finances/edupayments/availability` | Показывать ли раздел оплаты: `result` - boolean | проверено |
 | GET | `/api/finances/edupayments/contracts` | Договоры платного обучения; у бюджетника пусто | проверено |
 | GET | `/api/finances/edupayments/payments` | График и история платежей; у бюджетника пусто | проверено |
 | POST | `/api/finances/edupayments/payments/pay` | Создать платёжную сессию: `{contractId, sum, successUrl, failureUrl}`; `result` - URL оплаты, сайт делает redirect | сайт |
@@ -54,6 +54,11 @@
 Полные схемы: `ScholarshipTotal`, `ScholarshipPayout`, `ScholarshipPayoutItem` в
 [../../openapi/my-itmo.yaml](../../openapi/my-itmo.yaml). Аналогичная оплата общежития описана в
 [dormitory.md](dormitory.md).
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

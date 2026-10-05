@@ -53,7 +53,7 @@ API одинаковое, отличается только префикс. `{p}
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/api/{p}/status/` | Состояние кампании: `semester {choice_status, date_start, date_end, semester, study_year}` (GET снят) | сайт |
+| GET | `/api/{p}/status/` | Состояние кампании: `semester {choice_status, date_start, date_end, semester, study_year}` | проверено |
 | GET | `/api/{p}/json/` | Дерево модулей и потоков: `result.json` (GET снят: код 97) | сайт |
 | GET | `/api/{p}/current/` | Текущий выбор: `flow_id[]`, `intersections` (GET снят: код 97) | сайт |
 | GET | `/api/{p}/description/`, `/api/{p}/description/start/` | Описания курсов: список и структурированный вид (GET снят: код 97) | сайт |
@@ -86,6 +86,11 @@ API одинаковое, отличается только префикс. `{p}
 | Закрытая кампания | Все GET, кроме `status/`, отвечают `error_code` 97 "Выборность еще не открыта", `result: null` |
 | `booking/` | Места занимаются или освобождаются сразу, без подтверждения; `error_code` 0 или 109 - успех (109 - успех с пересечениями в расписании) |
 | `commit/` | `status` 2 - подтвердить, 1 - вернуть в редактирование; `flow_id` - все выбранные потоки; сайт не даёт подтвердить при пересечениях |
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

@@ -32,8 +32,8 @@ Android-приложения.
 | GET | `/api/booking/rooms/byName?search` | Поиск помещения по названию или номеру | проверено |
 | GET | `/api/booking/users/status` | Телефон для предзаполнения формы: `{phone_number}` | проверено |
 | GET | `/api/booking/bookings/my` | Брони, созданные студентом или где он соорганизатор (`dateStart` в приложении) | проверено |
-| GET | `/api/booking/bookings/statuses` | Справочник статусов `[{status_id, status_name}]` (GET снят) | сайт |
-| GET | `/api/booking/users/event/mostPopular?counts` | Частые названия мероприятий для подсказки в форме (GET снят) | сайт |
+| GET | `/api/booking/bookings/statuses` | Справочник статусов `[{status_id, status_name}]` | проверено |
+| GET | `/api/booking/users/event/mostPopular?counts` | Частые названия мероприятий для подсказки в форме | проверено |
 | POST | `/api/booking/bookings/` | Создать бронь: массив ровно из одного объекта | проверено |
 | PATCH | `/api/booking/bookings/` | Изменить бронь владельца в статусе 5: то же тело плюс `booking_id`, `event_name` | сайт |
 | DELETE | `/api/booking/bookings/{id}` | Отменить свою бронь до начала | проверено |
@@ -87,6 +87,11 @@ GET `https://dev.my.itmo.su/api/booking/users/event/mostPopular?counts=2` (ст�
 - `roomBookings` содержит `owner_fio` и `owner_isu` чужих броней.
 - `bookings/my` содержит ФИО владельца, телефон, соорганизаторов и поля `password_for_room`,
   `password_for_virtual_room`, ссылки на виртуальную комнату.
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

@@ -26,9 +26,9 @@
 | GET | `/api/dormitory/status/full` | Статус: этап, место в очереди, тип, назначенное общежитие с инструкцией по заселению | проверено |
 | GET | `/api/dormitory/payments/contracts/periods` | Учебные годы, за которые есть договоры: `{year, dateFrom, dateTo}` | проверено |
 | GET | `/api/dormitory/payments/contracts?from&to` | Договоры за период: баланс и график платежей | проверено |
-| GET | `/api/dormitory/apartments` | Общежития для выбора категории: `[{id, name, address}]` (GET снят) | сайт |
-| GET | `/api/dormitory/documents` | Медицинские документы для заселения: `[{documentType, documentTypeName, status, status_name, requestId, templateId}]` (GET снят) | сайт |
-| GET | `/api/dormitory/settlement/slots` | Слоты заселения `[{timeSlotId, timeSlot}]` (GET снят) | сайт |
+| GET | `/api/dormitory/apartments` | Общежития для выбора категории: `[{id, name, address}]` | проверено |
+| GET | `/api/dormitory/documents` | Медицинские документы для заселения: `[{documentType, documentTypeName, status, status_name, requestId, templateId}]` | проверено |
+| GET | `/api/dormitory/settlement/slots` | Слоты заселения `[{timeSlotId, timeSlot}]` | проверено |
 | POST | `/api/dormitory/settlement/register` | Записаться на дату заселения: `{timeSlotId}`; статус 2 -> 3 | сайт |
 | DELETE | `/api/dormitory/settlement/remove` | Снять запись на дату, без тела; статус 3 -> 2 | сайт |
 | DELETE | `/api/dormitory/settlement/cancel` | Отказаться от места и выйти из очереди, без тела | сайт |
@@ -51,6 +51,11 @@
 | Оплата | Как у оплаты обучения ([finances.md](finances.md)): сайт делает redirect на URL из `result` |
 
 Полные схемы: `DormitoryStatus`, `DormitoryContract` в [../../openapi/my-itmo.yaml](../../openapi/my-itmo.yaml).
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

@@ -25,9 +25,9 @@
 |---|---|---|---|
 | GET | `/api/queues/current` | Свои предстоящие записи | проверено |
 | GET | `/api/queues/archive` | Свои прошедшие записи | проверено |
-| GET | `/api/queues/` | Доступные очереди (GET снят: пустой массив) | сайт |
-| GET | `/api/queues/?table_id&type_id` | Одна очередь; сайт берёт `result[0]`, в том числе `template_id` (GET снят: пустой массив) | сайт |
-| GET | `/api/queues/slots?table_id&type_id` | Свободные слоты `[{time_table_id, date}]` (GET снят) | сайт |
+| GET | `/api/queues/` | Доступные очереди | проверено |
+| GET | `/api/queues/?table_id&type_id` | Одна очередь; сайт берёт `result[0]`, в том числе `template_id` | проверено |
+| GET | `/api/queues/slots?table_id&type_id` | Свободные слоты `[{time_table_id, date}]` | проверено |
 | POST | `/api/queues/` | Записаться: `{time_table_id, phone, comment, request_id}` | сайт |
 | DELETE | `/api/queues/` | Отменить запись: тело `{type_id, application_id}` | сайт |
 | GET, POST, DELETE | `https://queue.itmo.pro/api/v1/queue` | Список очередей, запись, отмена в приложении | приложение |
@@ -48,6 +48,11 @@
 | Успех | `error_code` 0; текст ошибки сервера сайт показывает из `error_message` |
 
 Полная схема `QueueEntry` в [../../openapi/my-itmo.yaml](../../openapi/my-itmo.yaml).
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

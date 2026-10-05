@@ -54,19 +54,19 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/api/requests/v2/forms` | Доступные формы по категориям: `[{id, code, name, icon, color, sortOrder, forms[{id, name, description, version, alias}]}]` (GET снят) | сайт |
-| GET | `/api/requests/v2/forms/{alias}` | Форма: `name`, `description`, `htmlNote`, `category`, `version`, `schemaJson` (строка), `alias`, `accessCodes` (GET снят для `p100`) | сайт |
-| GET | `/api/requests/v2/categories` | Категории форм (GET снят) | сайт |
-| GET | `/api/requests/v2/dictionaries` | Список справочников `[{code, name}]` (GET снят) | сайт |
+| GET | `/api/requests/v2/forms` | Доступные формы по категориям: `[{id, code, name, icon, color, sortOrder, forms[{id, name, description, version, alias}]}]` | проверено |
+| GET | `/api/requests/v2/forms/{alias}` | Форма: `name`, `description`, `htmlNote`, `category`, `version`, `schemaJson` (строка), `alias`, `accessCodes` | проверено |
+| GET | `/api/requests/v2/categories` | Категории форм | проверено |
+| GET | `/api/requests/v2/dictionaries` | Список справочников `[{code, name}]` | проверено |
 | POST | `/api/requests/v2/dictionaries/resolve?code&...` | Варианты справочника для вопроса формы; POST только для чтения, тело - контекст формы, в параметрах код, фильтр, `skip`, `take` | сайт |
 | GET | `/api/requests/v2/prefills` | Описания предзаполнений (GET снят: пустой массив) | сайт |
 | POST | `/api/requests/v2/prefills/resolve` | Значение предзаполнения для вопроса формы; только чтение | сайт |
 | POST | `/api/requests/v2/requests` | Подать заявку: `{alias, payloadJson}`, `payloadJson` - JSON-строка данных SurveyJS; в ответе `id` | сайт |
-| GET | `/api/requests/v2/requests/mine` | Свои заявки v2 (GET снят: пустой массив) | сайт |
+| GET | `/api/requests/v2/requests/mine` | Свои заявки v2 | проверено |
 | GET | `/api/requests/v2/requests/{id}` | Детали заявки v2: `status`, `statusCode`, `createdAt`, `files` | сайт |
 | GET | `/api/requests/v2/requests/{id}/files/{variable}` | Готовый файл (подписанная справка): `{base64Content, contentType, filename}` | сайт |
 | GET | `/api/requests/v2/platform-roles/me` | Роль в платформе: `{userId, role, explicit}` (GET снят) | сайт |
-| GET | `/api/requests/v2/requests/task-counts` | Счётчики задач: `{ownRequestTasks, assignedRequestTasks}` (GET снят) | сайт |
+| GET | `/api/requests/v2/requests/task-counts` | Счётчики задач: `{ownRequestTasks, assignedRequestTasks}` | проверено |
 | GET | `/api/requests/v2/tasks/mine/request-ids` | Заявки, где у пользователя есть задача (GET снят: пустой массив) | сайт |
 | GET | `/api/requests/v2/tasks/mine/by-request/{id}` | Задача пользователя по заявке | сайт |
 | POST | `/api/requests/v2/tasks/{id}/complete` | Выполнить задачу процесса (исполнитель или согласующий) | сайт |
@@ -119,6 +119,11 @@
 
 Полные схемы legacy: `RequestTemplate`, `RequestField`, `RequestOption`, `RequestSummary`, `RequestDetails` в
 [../../openapi/my-itmo.yaml](../../openapi/my-itmo.yaml). v2 в спецификацию не входит.
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 

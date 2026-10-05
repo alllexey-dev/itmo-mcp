@@ -22,8 +22,8 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/achievements/my` | Достижения пользователя и прогресс | приложение |
-| GET | `/achievements/status` | Новые (непросмотренные) достижения | приложение |
+| GET | `/achievements/my` | Достижения пользователя и прогресс | проверено |
+| GET | `/achievements/status` | Новые (непросмотренные) достижения | проверено |
 | PATCH | `/achievements/status/{id}` | Отметить просмотренным; массовый вызов шлёт тело-массив id, а в URL первый id | приложение |
 
 Поля модели: `achievement_id`, `name`, `description`, `description_short`, `icon_link`, `level`, `type_id`,
@@ -83,12 +83,12 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/category` | Категории просьб `[{id, name}]` | приложение |
+| GET | `/category` | Категории просьб `[{id, name}]` | проверено |
 | GET | `/tasks` | Текущие задачи | приложение |
 | POST | `/tasks` | Создать просьбу о помощи (`name`, `description`, `category`, `owner_id`) | приложение |
 | GET | `/tasks/{type}` | Ответы по задаче | приложение |
-| GET | `/tasks/my` | Задачи, где пользователь исполнитель | приложение |
-| GET | `/tasks/created` | Задачи, созданные пользователем | приложение |
+| GET | `/tasks/my` | Задачи, где пользователь исполнитель | проверено |
+| GET | `/tasks/created` | Задачи, созданные пользователем | проверено |
 | PUT | `/tasks/close/{taskId}` | Закрыть задачу | приложение |
 | POST | `/answer` | Откликнуться на задачу | приложение |
 | PUT | `/answer/best/{answerId}` | Выбрать лучший ответ | приложение |
@@ -101,12 +101,12 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `rate.itmo.su /buildings` | Корпуса: `id`, `name`, `bld_type` | сайт (GET снят) |
-| GET | `rate.itmo.su /rooms/{bldId}` | Помещения корпуса: `room_number`, `floor`, `room_type` | приложение |
+| GET | `rate.itmo.su /buildings` | Корпуса: `id`, `name`, `bld_type` | проверено |
+| GET | `rate.itmo.su /rooms/{bldId}` | Помещения корпуса: `room_number`, `floor`, `room_type` | проверено |
 | GET | `rate.itmo.su /events` | События университета для оценки: `event_id`, `name`, `date_start`, `date_end` | проверено |
-| GET | `rate.itmo.su /tags/{type}` | Теги для отзыва по типу оценки | приложение |
+| GET | `rate.itmo.su /tags/{type}` | Теги для отзыва по типу оценки | проверено |
 | GET | `rate.itmo.su /rating/lessons?teacher&discipline&date&type_lesson&group` | Оценка конкретного занятия, если уже поставлена | приложение |
-| GET | `rate.itmo.su /rating` | Оценки пользователя | приложение |
+| GET | `rate.itmo.su /rating` | Оценки пользователя | проверено |
 | POST | `rate.itmo.su /rating` | Отправить оценку занятия, события или инфраструктуры (`mark`, `emoji`, `comment`, `tags`, `photos`) | приложение |
 | ? | `quality.itmo.su /rating` | Старый адрес отправки оценки (`send_rate`) | приложение |
 
@@ -122,7 +122,7 @@
 
 | Метод | Путь | Что делает | Статус |
 |---|---|---|---|
-| GET | `/bypass` | Обходной лист (вероятно, при выпуске или отчислении): подразделения, решения, проблемы, контактные лица | приложение |
+| GET | `/bypass` | Обходной лист (вероятно, при выпуске или отчислении): подразделения, решения, проблемы, контактные лица | проверено |
 
 Поля: `departments`, `decision`, `decision_id`, `problem`, `comment`, `actions` (`action_id`, `url`),
 `contact_person_name`.
@@ -189,7 +189,8 @@ QR-код - средство физического доступа; агенту
 
 ## Спецификация
 
-Проверенные ручки клубов, загруженности, событий и "Актуального" описаны в [../openapi/itmo-services.yaml](../openapi/itmo-services.yaml), примеры
+Проверенные ручки клубов, загруженности, событий, "Актуального", достижений, помощи, обходного листа
+и оценки описаны в [../openapi/itmo-services.yaml](../openapi/itmo-services.yaml), примеры
 ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp

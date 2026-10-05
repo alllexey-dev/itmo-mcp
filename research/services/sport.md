@@ -45,20 +45,20 @@
 | DELETE | `/api/sport/sign/schedule/lessons` | Отписка от разовых занятий, тело `[lessonId]` | проверено |
 | POST | `/api/sport/sign/schedule/lesson_groups/{id}` | Запись в группу на весь семестр (уровни 2-4); для открытых занятий тело с анкетой | сайт |
 | DELETE | `/api/sport/sign/schedule/lesson_groups/{id}` | Выход из семестровой группы, место может уйти другому | сайт |
-| GET | `/api/sport/sign/schedule/lessons/{id}/other` | Для уровня 1 - id уже записанных занятий группы, иначе `{signed}` (GET снят) | сайт |
-| GET | `/api/sport/sign/schedule/limits` | Вместимость: `{lesson_group_id: {lesson_id: {limit, available}}}` (GET снят) | сайт |
+| GET | `/api/sport/sign/schedule/lessons/{id}/other` | Для уровня 1 - id уже записанных занятий группы, иначе `{signed}` | проверено |
+| GET | `/api/sport/sign/schedule/limits` | Вместимость: `{lesson_group_id: {lesson_id: {limit, available}}}` | проверено |
 | POST | `/api/sport/sign/competitions/{id}` | Регистрация на соревнование; тело `[disciplineId]` заменяет выбор | сайт |
 | DELETE | `/api/sport/sign/competitions/{id}` | Отказ от соревнования | сайт |
-| GET | `/api/sport/projects/list` | Спортивные проекты: `limit`, `available`, `signed`, ссылки на инструкцию (GET снят) | сайт |
+| GET | `/api/sport/projects/list` | Спортивные проекты: `limit`, `available`, `signed`, ссылки на инструкцию | проверено |
 | POST | `/api/sport/sign/projects/{id}` | Запись в проект, тело `{link}` | сайт |
 | DELETE | `/api/sport/sign/projects/{id}` | Выход из проекта | сайт |
-| GET | `/api/sport/personal/selections` | Отборочные секции и требования к ним (GET снят) | сайт |
+| GET | `/api/sport/personal/selections` | Отборочные секции и требования к ним | проверено |
 | GET | `/api/sport/personal/open_form?section` | Сохранённая анкета открытого занятия, часто `null` (GET снят) | сайт |
-| GET | `/api/sport/personal/open_form/ranks` | Справочник спортивных разрядов для анкеты `[{id, value}]` (GET снят) | сайт |
-| GET | `/api/sport/personal/sign_attempts` | Число попыток, одно число (GET снят) | сайт |
-| GET | `/api/sport/personal/externat` | Статус экстерната: `signed`, `externat_status_id`, `decline_reason` (GET снят) | сайт |
-| GET | `/api/sport/time_slots` | Пары: `[{id, time_start, time_end}]` (GET снят) | сайт |
-| GET | `/api/sport/personal/briefing/list` | Инструктаж по технике безопасности: файлы и признак `signed` (GET снят) | сайт |
+| GET | `/api/sport/personal/open_form/ranks` | Справочник спортивных разрядов для анкеты `[{id, value}]` | проверено |
+| GET | `/api/sport/personal/sign_attempts` | Число попыток, одно число | проверено |
+| GET | `/api/sport/personal/externat` | Статус экстерната: `signed`, `externat_status_id`, `decline_reason` | проверено |
+| GET | `/api/sport/time_slots` | Пары: `[{id, time_start, time_end}]` | проверено |
+| GET | `/api/sport/personal/briefing/list` | Инструктаж по технике безопасности: файлы и признак `signed` | проверено |
 | GET | `/api/sport/personal/briefing/{id}/signed` | Подписан ли инструктаж | сайт |
 | POST | `/api/sport/personal/briefing` | Подписание инструктажа | сайт |
 | POST | `/api/sport/briefing/{id}/sign` | Подписание инструктажа (второй вариант вызова в бандле) | сайт |
@@ -116,6 +116,11 @@
 
 После записи или отписки первый повторный GET иногда возвращает состояние до изменения; ITMO.Widgets
 перечитывает данные через секунду (статус: проекты).
+
+## Спецификация
+
+Проверенные дополнительные ручки этого сервиса описаны в [../openapi/my-itmo-extra.yaml](../openapi/my-itmo-extra.yaml), примеры
+ответов - в [../openapi/examples/](../openapi/examples/).
 
 ## Покрытие в itmo-mcp
 
