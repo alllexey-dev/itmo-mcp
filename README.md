@@ -1,13 +1,21 @@
 # itmo-mcp
 
 MCP-сервер для сервисов Университета ИТМО: [my.itmo.ru](https://my.itmo.ru) и [БАРС](https://bars.itmo.ru).
-Подключите его к Claude, Cursor или другому MCP-клиенту и спрашивайте обычным языком:
+Подключите его к Claude, Codex, Cursor или другому MCP-клиенту и спрашивайте обычным языком:
 "какие пары завтра?", "сколько баллов по матану в БАРС?", "куда записаться на волейбол на этой неделе?",
 "когда приходила стипендия?".
 
 Сервер только читает данные: он ничего не меняет, не записывает на занятия и не подаёт заявки.
 
 > Неофициальный проект. Не связан с Университетом ИТМО. API сервисов может измениться без предупреждения.
+
+## Быстрая настройка через агента
+
+Отправьте своему агенту (Claude Code, Codex, Cursor):
+
+```text
+Настрой мне MCP-сервер itmo-mcp по README https://github.com/alllexey-dev/itmo-mcp
+```
 
 ## Что умеет
 
@@ -78,6 +86,22 @@ Settings -> Developer -> Edit Config, добавьте в `claude_desktop_config
 claude mcp add itmo -e ITMO_USERNAME=123456 -e ITMO_PASSWORD='ваш пароль' -- npx -y itmo-mcp
 ```
 
+### Codex
+
+```bash
+codex mcp add itmo --env ITMO_USERNAME=123456 --env ITMO_PASSWORD='ваш пароль' -- npx -y itmo-mcp
+```
+
+Или вручную в `~/.codex/config.toml`. Первый запуск `npx` скачивает пакет, поэтому таймаут старта увеличен:
+
+```toml
+[mcp_servers.itmo]
+command = "npx"
+args = ["-y", "itmo-mcp"]
+startup_timeout_sec = 60
+env = { ITMO_USERNAME = "123456", ITMO_PASSWORD = "ваш пароль" }
+```
+
 ### Cursor, VS Code и другие клиенты
 
 Используйте ту же команду (`npx -y itmo-mcp`) и те же переменные окружения в настройках MCP вашего клиента.
@@ -120,6 +144,12 @@ docker run -d --name itmo-mcp -p 8080:8080 \
 
 ```bash
 claude mcp add --transport http itmo https://mcp.example.com/mcp --header "Authorization: Bearer <токен>"
+```
+
+Из Codex (токен берётся из переменной окружения `ITMO_MCP_TOKEN`):
+
+```bash
+codex mcp add itmo --url https://mcp.example.com/mcp --bearer-token-env ITMO_MCP_TOKEN
 ```
 
 ## Приватность
