@@ -38,7 +38,7 @@ Android-приложения. В приложении дополнительно
 |---|---|---|---|
 | GET | `/schedule/personal?date_start&date_end` | Личное расписание; путь совпадает с сайтом | приложение |
 | ? | `/schedule/{group}?date_start&date_end` | Расписание учебной группы | приложение |
-| GET | `/teacher/{isu}?date_start&date_end` | Расписание преподавателя из карточки человека | приложение |
+| GET | `/teacher/{isu}?date_start&date_end` | Расписание преподавателя по ISU, та же модель дня, что у личного | проверено |
 | ? | `/teacher/{teacherId}?date_start&date_end` | Расписание преподавателя из поиска | приложение |
 
 `?` - HTTP-метод в разборе приложения не установлен.
@@ -71,6 +71,12 @@ Android-приложения. В приложении дополнительно
 
 Полная схема: `ScheduleDay`, `Lesson`, `ScheduleTimeSlot` в
 [../../openapi/my-itmo.yaml](../../openapi/my-itmo.yaml).
+
+## Спецификация
+
+Расписание преподавателя: `getTeacherSchedule` в [../openapi/itmo-services.yaml](../openapi/itmo-services.yaml).
+Путь `/api/v3/schedule/{group}` на название потока и на номер группы отвечает 404: формат идентификатора группы
+не найден.
 
 ## Покрытие в itmo-mcp
 

@@ -25,7 +25,7 @@
 | GET | `/api/record_book/specializations` | Образовательные программы студента с перечнем семестров | проверено |
 | GET | `/api/record_book/{specializationId}/{semester}` | Итоги по дисциплинам одного семестра; `specializationId` = `main_plan` | проверено |
 | GET | `/api/record_book/{entryId}` | Дерево контрольных мероприятий одной записи; `entryId` = `est_id` | проверено |
-| GET | `https://recordbook.itmo.su/api/record_book/history?offset&count` | Лента изменений баллов с пагинацией | приложение |
+| GET | `https://recordbook.itmo.su/api/record_book/history?offset&count` | Лента изменений баллов с пагинацией: `discipline_name`, `name`, `date`, `old_value`, `new_value`, `teacher` | проверено |
 
 Остальные ручки приложения (`specializations`, `{mainPlan}/{semester}`, `{disciplineId}`) совпадают с сайтом по
 пути (статус приложения - приложение, сайта - проверено).
@@ -55,8 +55,9 @@
 
 ## Риски и открытые вопросы
 
-- `history?offset&count` найдена только в приложении на `recordbook.itmo.su`; есть ли она за прокси сайта
-  (`/api/record_book/history`) и принимает ли токен сайта, не проверено. На сайте путь `/api/record_book/{entryId}`
+- `history?offset&count` на `recordbook.itmo.su` принимает токен сайта (проверено, модель `getRecordBookHistory` в
+  [../openapi/itmo-services.yaml](../openapi/itmo-services.yaml)); есть ли она за прокси сайта
+  (`/api/record_book/history`), не проверялось. На сайте путь `/api/record_book/{entryId}`
   с `history` вместо числа может конфликтовать с маршрутом разбивки.
 - Поведение для студентов с несколькими программами (`specializations` из нескольких элементов) живьём не
   проверено: инструмент берёт программу с текущим семестром.
