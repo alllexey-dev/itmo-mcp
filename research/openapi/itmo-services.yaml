@@ -15,6 +15,7 @@ servers:
 security:
   - itmoId: []
 tags:
+  - name: semester
   - name: occupancy
   - name: schedule
   - name: recordbook
@@ -1051,6 +1052,44 @@ paths:
                 required:
                   - success
                   - data
+        default:
+          $ref: "#/components/responses/Error"
+  /:
+    servers:
+      - url: https://semester.itmo.su
+    get:
+      operationId: getCurrentSemester
+      tags:
+        - semester
+      summary: Current academic semester (public, no authentication)
+      security: []
+      responses:
+        "200":
+          description: Semester
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: ../../openapi/my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          number:
+                            type: integer
+                          date_start:
+                            type: string
+                            format: date-time
+                          date_end:
+                            type: string
+                            format: date-time
+                          st_year:
+                            type: string
+                          sem_id:
+                            type: integer
         default:
           $ref: "#/components/responses/Error"
 components:
