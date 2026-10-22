@@ -3,8 +3,26 @@ import { join } from "node:path";
 
 /** Long-lived credentials rotated by ITMO.ID; persisted so restarts do not need a new login. */
 export interface AuthState {
+  /** my.itmo.ru refresh token: of the paired session when `connection` is set, else of the env credentials. */
   refreshToken?: string;
   keycloakIdentity?: string;
+  connection?: Connection;
+}
+
+/** The pairing with ITMO.Widgets (`itmo-mcp pair`): its connection token and the ITMO.ID session the phone signed in. */
+export interface Connection {
+  /** `iwc_` bearer for the ITMO.Widgets API. */
+  token: string;
+  id: string;
+  name: string;
+  isu: number;
+  itmo: {
+    sid: string;
+    expiresAt: string;
+    refreshExpiresAt?: string;
+    /** `closed` once ITMO.ID refused the session's refresh token; `itmo-mcp renew` brings a new session. */
+    status: "ok" | "closed";
+  };
 }
 
 export class StateStore {

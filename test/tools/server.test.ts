@@ -7,6 +7,7 @@ import { createBarsClient } from "../../src/clients/bars.js";
 import { createMyItmoClient } from "../../src/clients/my-itmo.js";
 import { createServer } from "../../src/server.js";
 import { json, type RecordedCall, stubFetch } from "../support/fetch.js";
+import { WidgetsClient } from "../../src/widgets/client.js";
 
 const fixture = (path: string) => JSON.parse(readFileSync(new URL(`../fixtures/${path}`, import.meta.url), "utf8"));
 const ok = (result: unknown) => ({ error_code: 0, error_message: null, result });
@@ -28,6 +29,7 @@ async function connect(routes: Routes, options: { isu?: () => Promise<number> } 
       session: { authorization: async () => "Bearer SECRET-BARS", invalidate: () => undefined },
       fetchFn,
     }),
+    widgets: new WidgetsClient("https://widgets.test", async () => "iwc_test", fetchFn),
     isu: options.isu ?? (async () => 123456),
     now: () => new Date("2026-10-04T22:30:00Z"), // 2026-10-05 01:30 in Moscow
   });
@@ -52,7 +54,7 @@ describe("itmo-mcp server", () => {
 
     const { tools } = await client.listTools();
 
-    expect(tools.length).toBe(25);
+    expect(tools.length).toBe(28);
     for (const tool of tools) {
       expect(tool.annotations?.readOnlyHint, tool.name).toBe(true);
       expect(tool.annotations?.destructiveHint, tool.name).toBe(false);
@@ -262,6 +264,7 @@ describe("russian keywords", () => {
     const server = createServer({
       my: createMyItmoClient({ tokens, fetchFn }),
       bars: createBarsClient({ session: { authorization: async () => "Bearer b", invalidate: () => undefined }, fetchFn }),
+      widgets: new WidgetsClient("https://widgets.test", async () => "iwc_test", fetchFn),
       isu: async () => 1,
       now: () => new Date(),
       actions: new PendingActions(),
@@ -272,7 +275,7 @@ describe("russian keywords", () => {
 
     const { tools } = await client.listTools();
 
-    expect(tools).toHaveLength(33);
+    expect(tools).toHaveLength(38);
     for (const tool of tools) {
       expect(tool.description, tool.name).toMatch(/[а-яё]/i);
       expect(tool.description, tool.name).toMatch(/ИТМО|БАРС/);

@@ -7,6 +7,7 @@ import { createServer } from "../../src/server.js";
 import { PendingActions } from "../../src/tools/actions.js";
 import { freeIntervals, normalizePhone } from "../../src/tools/booking.js";
 import { json, type RecordedCall, stubFetch } from "../support/fetch.js";
+import { WidgetsClient } from "../../src/widgets/client.js";
 
 const ok = (result: unknown) => ({ error_code: 0, error_message: null, result });
 const MY = "my.itmo.ru";
@@ -24,6 +25,7 @@ async function connect(routes: Record<string, Route>, writes = true) {
     my: createMyItmoClient({ tokens: { accessToken: async () => "t", forceRefresh: async () => "t" }, fetchFn }),
     bars: createBarsClient({ session: { authorization: async () => "Bearer b", invalidate: () => undefined }, fetchFn }),
     isu: async () => 111,
+    widgets: new WidgetsClient("https://widgets.test", async () => "iwc_test", fetchFn),
     now: () => NOW,
     actions: writes ? new PendingActions(() => NOW.getTime()) : undefined,
   };
@@ -74,7 +76,7 @@ describe("write tools registration", () => {
     const tools = (await client.listTools()).tools;
 
     expect(tools.filter((t) => t.annotations?.readOnlyHint === false).map((t) => t.name)).toEqual(["itmo_confirm_action"]);
-    expect(tools.filter((t) => t.name.endsWith("_preview")).length).toBe(7);
+    expect(tools.filter((t) => t.name.endsWith("_preview")).length).toBe(9);
   });
 });
 

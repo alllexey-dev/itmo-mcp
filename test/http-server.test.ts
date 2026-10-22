@@ -4,6 +4,7 @@ import { createBarsClient } from "../src/clients/bars.js";
 import { createMyItmoClient } from "../src/clients/my-itmo.js";
 import { createHttpServer } from "../src/http-server.js";
 import { json, stubFetch } from "./support/fetch.js";
+import { WidgetsClient } from "../src/widgets/client.js";
 
 const servers: { close(): void }[] = [];
 afterEach(() => servers.splice(0).forEach((s) => s.close()));
@@ -14,6 +15,7 @@ async function start(options: { token?: string; allowedHosts?: string[] } = {}) 
     my: createMyItmoClient({ tokens: { accessToken: async () => "t", forceRefresh: async () => "t" }, fetchFn }),
     bars: createBarsClient({ session: { authorization: async () => "Bearer b", invalidate: () => undefined }, fetchFn }),
     isu: async () => 1,
+    widgets: new WidgetsClient("https://widgets.test", async () => "iwc_test", fetchFn),
     now: () => new Date(),
   };
   const server = createHttpServer(deps, { allowedHosts: options.allowedHosts ?? [], token: options.token });

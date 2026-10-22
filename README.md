@@ -1,9 +1,10 @@
 # itmo-mcp
 
-MCP-сервер для сервисов Университета ИТМО: [my.itmo.ru](https://my.itmo.ru) и [БАРС](https://bars.itmo.ru).
+MCP-сервер для сервисов Университета ИТМО: [my.itmo.ru](https://my.itmo.ru) и [БАРС](https://bars.itmo.ru), а также
+[ITMO.Widgets](https://widgets.alllexey.dev) (отзывы о преподавателях, ссылки предметов, очереди на физкультуру).
 Подключите его к Claude, Codex, Cursor или другому MCP-клиенту и спрашивайте обычным языком:
 "какие пары завтра?", "сколько баллов по матану в БАРС?", "куда записаться на волейбол на этой неделе?",
-"когда приходила стипендия?".
+"что пишут про преподавателя по матану?".
 
 По умолчанию сервер только читает данные. Запись на физкультуру, бронирование аудиторий и подачу заявок
 можно включить отдельно (см. "Изменение данных"): каждое действие сначала показывается и выполняется
@@ -45,6 +46,12 @@ MCP-сервер для сервисов Университета ИТМО: [my.
 | `itmo_booking_availability` | Свободное время комнат на дату (чужие брони только как "занято") |
 | `itmo_requests_catalog`, `itmo_request_form` | Какие справки и заявки можно подать, поля формы |
 | `itmo_get_request_details` | Статус и поля поданной заявки |
+| `widgets_get_teacher_reviews` | Отзывы о преподавателе из ITMO.Widgets и сводка по ним (доступ «Отзывы о преподавателях») |
+| `widgets_get_subject_links` | Ссылки и чаты предмета от однокурсников (доступ «Ссылки предметов») |
+| `widgets_get_sport_queue` | Ваши очереди на физкультуру в ITMO.Widgets (доступ «Очереди на физкультуру») |
+
+Инструменты `widgets_*` работают после подключения через приложение ITMO.Widgets (см. "Вход в ИТМО"). Если
+нужного доступа нет, инструмент скажет, какой переключатель включить в приложении: Профиль -> Устройства.
 
 ## Изменение данных
 
@@ -56,6 +63,7 @@ MCP-сервер для сервисов Университета ИТМО: [my.
 | `itmo_sport_competition_preview` | Регистрация на соревнование или отказ от участия |
 | `itmo_booking_create_preview`, `itmo_booking_cancel_preview` | Бронь аудитории или коворкинга, отмена своей брони |
 | `itmo_request_submit_preview`, `itmo_request_cancel_preview` | Подача заявки (например, справки с места учёбы), отмена |
+| `widgets_sport_queue_join_preview`, `widgets_sport_queue_leave_preview` | Очередь ITMO.Widgets на свободное место или автозапись, выход из очереди (записывает телефон) |
 | `itmo_confirm_action` | Выполняет подготовленное действие |
 
 Любое изменение идёт в два шага. Инструмент `*_preview` ничего не меняет: он перечитывает данные, проверяет
@@ -69,22 +77,58 @@ MCP-сервер для сервисов Университета ИТМО: [my.
 
 ## Вход в ИТМО
 
-Сервер входит в ITMO.ID от вашего имени. Подойдёт любой из вариантов (переменные окружения):
+### Через приложение ITMO.Widgets (рекомендуется)
 
-| Переменные | Доступ | Комментарий |
+```bash
+npx -y itmo-mcp setup
+```
+
+`setup` показывает QR-код, а потом предлагает добавить сервер в Claude Code, Codex и Cursor. Только подключить
+без клиентов: `npx -y itmo-mcp pair`.
+
+1. В приложении ITMO.Widgets: Профиль -> Устройства -> «Подключить устройство», отсканируйте QR или вставьте
+   ссылку из терминала. Ссылка действует 2 минуты, не пересылайте её.
+2. Сверьте код проверки в терминале и на телефоне, выберите доступы и войдите в ITMO.ID в окне приложения.
+3. Телефон передаёт серверу зашифрованный вход: отдельную сессию ITMO.ID только для этого сервера (на
+   [id.itmo.ru/activity](https://id.itmo.ru/activity) это отдельная строка) и токен ITMO.Widgets. Ни пароль, ни
+   cookie телефона сервер не получает.
+
+| Команда | Что делает |
+|---|---|
+| `itmo-mcp pair` | Подключение по QR-коду (`--name`, `--scopes reviews:read,links:read,sport:queue`) |
+| `itmo-mcp setup` | `pair`, затем добавляет сервер в Claude Code, Codex и Cursor (спрашивает про каждый) |
+| `itmo-mcp status` | Доступы, состояние входа в ИТМО и дата его окончания, доступность ITMO.Widgets |
+| `itmo-mcp renew` | Новый вход в ИТМО для того же подключения (QR-код ещё раз) |
+| `itmo-mcp unpair` | Завершает свою сессию ITMO.ID, отключает сервер в ITMO.Widgets и стирает его данные |
+
+- Сессия ITMO.ID живёт не больше 90 дней с входа. Когда ИТМО её закрывает, инструменты my.itmo.ru отвечают, что
+  нужен `itmo-mcp renew`, а приложение видит это в «Устройствах».
+- Если отключить сервер в приложении, при следующем запросе он сам завершит свою сессию ITMO.ID и сотрёт данные.
+- Через подключение доступен только my.itmo.ru. **Инструменты БАРС** работают только с `ITMO_KEYCLOAK_IDENTITY`
+  ниже, на ваш риск: эта cookie даёт полный доступ к аккаунту ITMO.ID, поэтому приложение её не передаёт.
+
+### Без приложения (переменные окружения)
+
+| Переменная | Доступ | Комментарий |
 |---|---|---|
-| `ITMO_USERNAME` + `ITMO_PASSWORD` | my.itmo.ru и БАРС | Проще всего. Пароль хранится в конфиге MCP-клиента |
-| `ITMO_KEYCLOAK_IDENTITY` | my.itmo.ru и БАРС | Без пароля. Cookie живёт около 90 дней |
+| `ITMO_KEYCLOAK_IDENTITY` | my.itmo.ru и БАРС | Cookie живёт около 90 дней. Это весь аккаунт: храните как пароль |
 | `ITMO_REFRESH_TOKEN` | только my.itmo.ru | Токен живёт 30 дней и обновляется сам |
 
-Чтобы разрешить запись, бронь и заявки, добавьте `ITMO_MCP_ENABLE_WRITES=true`.
+После подключения через приложение my.itmo.ru работает только через свою сессию, а `ITMO_KEYCLOAK_IDENTITY` нужна
+лишь для БАРС. Вход по логину и паролю (`ITMO_USERNAME`, `ITMO_PASSWORD`) убран в 0.3.0.
 
 Как получить `KEYCLOAK_IDENTITY`: войдите на [my.itmo.ru](https://my.itmo.ru), откройте DevTools
 (F12) -> Application -> Cookies -> `https://id.itmo.ru` и скопируйте значение `KEYCLOAK_IDENTITY`.
 
-ITMO.ID меняет токены при каждом входе. Сервер сохраняет свежие значения в `~/.config/itmo-mcp/state.json`
-(права `600`), поэтому после первого входа переменные можно не обновлять. Папку можно поменять через
-`ITMO_MCP_STATE_DIR`.
+ITMO.ID меняет токены при каждом входе. Сервер сохраняет свежие значения и подключение в
+`~/.config/itmo-mcp/state.json` (права `600`), поэтому после первого входа переменные можно не обновлять. Папку можно
+поменять через `ITMO_MCP_STATE_DIR`.
+
+| Переменная | Назначение |
+|---|---|
+| `ITMO_MCP_ENABLE_WRITES` | `true` разрешает запись, бронь, заявки и очереди (см. "Изменение данных") |
+| `ITMO_BROWSER_UA` | По умолчанию `true`: свои входы в ITMO.ID выглядят как Chrome. `false`: честная подпись `ITMO Widgets MCP bot` |
+| `ITMO_WIDGETS_URL` | Сервер ITMO.Widgets, по умолчанию `https://widgets.alllexey.dev` |
 
 ## Подключение
 
@@ -92,18 +136,15 @@ ITMO.ID меняет токены при каждом входе. Сервер �
 
 ### Claude Desktop
 
-Settings -> Developer -> Edit Config, добавьте в `claude_desktop_config.json`:
+Сначала подключите сервер (`npx -y itmo-mcp pair`), затем Settings -> Developer -> Edit Config, добавьте в
+`claude_desktop_config.json` (переменные окружения из "Вход в ИТМО" кладутся в `"env"`):
 
 ```json
 {
   "mcpServers": {
     "itmo": {
       "command": "npx",
-      "args": ["-y", "itmo-mcp"],
-      "env": {
-        "ITMO_USERNAME": "123456",
-        "ITMO_PASSWORD": "ваш пароль"
-      }
+      "args": ["-y", "itmo-mcp"]
     }
   }
 }
@@ -112,13 +153,13 @@ Settings -> Developer -> Edit Config, добавьте в `claude_desktop_config
 ### Claude Code
 
 ```bash
-claude mcp add itmo -e ITMO_USERNAME=123456 -e ITMO_PASSWORD='ваш пароль' -- npx -y itmo-mcp
+claude mcp add --scope user itmo -- npx -y itmo-mcp
 ```
 
 ### Codex
 
 ```bash
-codex mcp add itmo --env ITMO_USERNAME=123456 --env ITMO_PASSWORD='ваш пароль' -- npx -y itmo-mcp
+codex mcp add itmo -- npx -y itmo-mcp
 ```
 
 Или вручную в `~/.codex/config.toml`. Первый запуск `npx` скачивает пакет, поэтому таймаут старта увеличен:
@@ -128,7 +169,6 @@ codex mcp add itmo --env ITMO_USERNAME=123456 --env ITMO_PASSWORD='ваш пар
 command = "npx"
 args = ["-y", "itmo-mcp"]
 startup_timeout_sec = 60
-env = { ITMO_USERNAME = "123456", ITMO_PASSWORD = "ваш пароль" }
 ```
 
 ### Cursor, VS Code и другие клиенты
@@ -137,14 +177,18 @@ env = { ITMO_USERNAME = "123456", ITMO_PASSWORD = "ваш пароль" }
 
 ### Docker вместо Node.js
 
+Подключение сохраняется в томе `itmo-mcp`:
+
+```bash
+docker run -it --rm -v itmo-mcp:/state ghcr.io/alllexey-dev/itmo-mcp:v0.3.0 pair
+```
+
 ```json
 {
   "mcpServers": {
     "itmo": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "-e", "ITMO_USERNAME", "-e", "ITMO_PASSWORD",
-               "-v", "itmo-mcp:/state", "ghcr.io/alllexey-dev/itmo-mcp:v0.1.0", "--stdio"],
-      "env": { "ITMO_USERNAME": "123456", "ITMO_PASSWORD": "ваш пароль" }
+      "args": ["run", "-i", "--rm", "-v", "itmo-mcp:/state", "ghcr.io/alllexey-dev/itmo-mcp:v0.3.0", "--stdio"]
     }
   }
 }
@@ -152,15 +196,15 @@ env = { ITMO_USERNAME = "123456", ITMO_PASSWORD = "ваш пароль" }
 
 ## Свой сервер (HTTP)
 
-Сервер умеет Streamable HTTP: `POST /mcp`, health check на `GET /healthz`.
+Сервер умеет Streamable HTTP: `POST /mcp`, health check на `GET /healthz`. Подключите его так же, как в Docker
+выше (`... -v itmo-mcp:/state ... pair`), затем:
 
 ```bash
 docker run -d --name itmo-mcp -p 8080:8080 \
-  -e ITMO_USERNAME=123456 -e ITMO_PASSWORD='ваш пароль' \
   -e ITMO_MCP_HTTP_TOKEN="$(openssl rand -hex 32)" \
   -e ITMO_MCP_HTTP_ALLOWED_HOSTS=mcp.example.com \
   -v itmo-mcp:/state \
-  ghcr.io/alllexey-dev/itmo-mcp:v0.1.0
+  ghcr.io/alllexey-dev/itmo-mcp:v0.3.0
 ```
 
 | Переменная | Назначение |
@@ -183,9 +227,11 @@ codex mcp add itmo --url https://mcp.example.com/mcp --bearer-token-env ITMO_MCP
 
 ## Приватность
 
-- Сервер обращается напрямую к `id.itmo.ru`, `my.itmo.ru` и `bars.itmo.ru`. Других адресатов у данных нет.
+- Сервер обращается напрямую к `id.itmo.ru`, `my.itmo.ru` и `bars.itmo.ru`, а после подключения ещё к ITMO.Widgets
+  (`widgets.alllexey.dev`): за отзывами, ссылками и очередями и чтобы сообщить, работает ли его вход в ИТМО. Токены
+  ИТМО к ITMO.Widgets не уходят.
 - Ответы инструментов попадают в контекст модели и, значит, к провайдеру LLM, которым вы пользуетесь.
-- Пароль и токены не попадают в ответы инструментов и в логи.
+- Токены и cookie не попадают в ответы инструментов и в логи.
 
 ## OpenAPI и клиент
 
@@ -224,6 +270,10 @@ npm run build
 
 `verify:live` выводит только названия операций, HTTP-статусы и пути ошибок схемы, без самих данных.
 Новые фикстуры добавляйте только после `scripts/sanitize-fixture.ts`, он убирает персональные данные.
+
+## Изменения
+
+См. [CHANGELOG.md](CHANGELOG.md).
 
 ## Лицензия
 

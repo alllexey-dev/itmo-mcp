@@ -17,10 +17,6 @@ export function readSetCookies(response: Response): Map<string, string> {
   return cookies;
 }
 
-export function cookieHeader(cookies: Map<string, string>): string {
-  return [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
-}
-
 /** Fetch that attaches a credential and retries once with a fresh one when the server answers 401. */
 export function authorizedFetch(
   fetchFn: FetchFn,

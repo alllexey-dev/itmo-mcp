@@ -1,10 +1,13 @@
 import type { BarsClient } from "../clients/bars.js";
 import type { MyItmoClient } from "../clients/my-itmo.js";
+import type { WidgetsClient } from "../widgets/client.js";
 import type { PendingActions } from "./actions.js";
 
 export interface ToolDeps {
   my: MyItmoClient;
   bars: BarsClient;
+  /** ITMO.Widgets API of the paired connection (`itmo-mcp pair`). */
+  widgets: WidgetsClient;
   /** ISU number of the signed-in user. */
   isu(): Promise<number>;
   now(): Date;

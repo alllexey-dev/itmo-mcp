@@ -9,19 +9,17 @@ const optionalText = z
   .optional();
 
 const EnvSchema = z.object({
-  ITMO_USERNAME: optionalText,
-  ITMO_PASSWORD: optionalText,
   ITMO_REFRESH_TOKEN: optionalText,
   ITMO_KEYCLOAK_IDENTITY: optionalText,
   ITMO_MCP_STATE_DIR: optionalText,
   ITMO_MCP_HTTP_ALLOWED_HOSTS: optionalText,
   ITMO_MCP_HTTP_TOKEN: optionalText,
   ITMO_MCP_ENABLE_WRITES: optionalText,
+  ITMO_BROWSER_UA: optionalText,
+  ITMO_WIDGETS_URL: optionalText,
 });
 
 export interface Credentials {
-  username?: string;
-  password?: string;
   refreshToken?: string;
   keycloakIdentity?: string;
 }
@@ -35,14 +33,16 @@ export interface Config {
   httpToken?: string;
   /** Registers tools that change data (enroll, book, submit). Off by default. */
   writesEnabled: boolean;
+  /** Own ITMO.ID sign-ins look like desktop Chrome; false sends the honest `ITMO Widgets MCP bot` label. */
+  browserUserAgent: boolean;
+  /** ITMO.Widgets origin: pairing links and the Backend API under `/api`. */
+  widgetsUrl: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const parsed = EnvSchema.parse(env);
   return {
     credentials: {
-      username: parsed.ITMO_USERNAME,
-      password: parsed.ITMO_PASSWORD,
       refreshToken: parsed.ITMO_REFRESH_TOKEN,
       keycloakIdentity: parsed.ITMO_KEYCLOAK_IDENTITY,
     },
@@ -53,11 +53,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       .filter(Boolean),
     httpToken: parsed.ITMO_MCP_HTTP_TOKEN,
     writesEnabled: ["1", "true", "yes"].includes(parsed.ITMO_MCP_ENABLE_WRITES?.toLowerCase() ?? ""),
+    browserUserAgent: !["0", "false", "no"].includes(parsed.ITMO_BROWSER_UA?.toLowerCase() ?? ""),
+    widgetsUrl: (parsed.ITMO_WIDGETS_URL ?? "https://widgets.alllexey.dev").replace(/\/+$/, ""),
   };
 }
 
 export function hasAnyCredentials(credentials: Credentials): boolean {
-  return Boolean(
-    credentials.refreshToken || credentials.keycloakIdentity || (credentials.username && credentials.password),
-  );
+  return Boolean(credentials.refreshToken || credentials.keycloakIdentity);
 }

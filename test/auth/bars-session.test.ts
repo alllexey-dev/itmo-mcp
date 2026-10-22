@@ -68,24 +68,6 @@ describe("BarsSession", () => {
     expect(await session.authorization()).toBe("Bearer bars-1-c2");
   });
 
-  it("uses the password when there is no SSO cookie", async () => {
-    let lastAuthorize: RecordedCall | undefined;
-    const { session } = setup(
-      (call) => {
-        if (isAuthorize(call)) {
-          lastAuthorize = call;
-          return new Response(`"loginAction": "https://id.itmo.ru/login"`, { status: 200 });
-        }
-        if (call.url.pathname === "/login") return callback(lastAuthorize!, "pw");
-        if (isBarsLogin(call)) return barsLogin(call);
-        return notFound(call);
-      },
-      { username: "u", password: "p" },
-    );
-
-    expect(await session.authorization()).toBe("Bearer bars-1-pw");
-  });
-
   it("fails when BARS returns no session header", async () => {
     const { session } = setup((call) => (isAuthorize(call) ? callback(call) : new Response(null, { status: 401 })), {
       keycloakIdentity: "sso",

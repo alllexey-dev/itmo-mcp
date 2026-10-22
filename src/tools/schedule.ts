@@ -39,6 +39,7 @@ export function registerScheduleTools(server: McpServer, deps: ToolDeps): void {
               lessons: day.lessons.map((l) => ({
                 time: `${l.time_start}-${l.time_end}`,
                 subject: l.subject,
+                subject_id: l.subject_id,
                 kind: l.work_type,
                 teacher: l.teacher_name,
                 teacher_isu: l.teacher_id,
