@@ -1,4 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, type RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerConfirmTool } from "./tools/actions.js";
 import { registerBarsTools } from "./tools/bars.js";
 import { registerBookingActionTools, registerBookingTools } from "./tools/booking.js";
@@ -30,10 +30,11 @@ a confirmation_token without changing anything; itmo_confirm_action carries the 
 preview to the user and call itmo_confirm_action only after the user explicitly agrees to that exact change.`;
 
 export function createServer(deps: ToolDeps): McpServer {
-  const server = withRussianKeywords(new McpServer(
+  const tools = new Map<string, RegisteredTool>();
+  const server = withRussianKeywords(tracked(new McpServer(
     { name: "itmo-mcp", version: VERSION },
     { instructions: READ_INSTRUCTIONS + (deps.actions ? WRITE_INSTRUCTIONS : "") },
-  ));
+  ), tools));
   registerProfileTools(server, deps);
   registerScheduleTools(server, deps);
   registerRecordBookTools(server, deps);
@@ -51,5 +52,25 @@ export function createServer(deps: ToolDeps): McpServer {
     registerWidgetsActionTools(server, deps, deps.actions);
     registerConfirmTool(server, deps.actions);
   }
+  if (deps.availability) {
+    const unsubscribe = deps.availability.apply(tools);
+    const onclose = server.server.onclose;
+    server.server.onclose = () => {
+      unsubscribe();
+      onclose?.();
+    };
+  }
+  return server;
+}
+
+/** Remembers every tool registered on [server] by name, for [ToolAvailability.apply]. */
+function tracked(server: McpServer, tools: Map<string, RegisteredTool>): McpServer {
+  const register = server.registerTool.bind(server);
+  const patched = (name: string, config: unknown, callback: unknown) => {
+    const tool = register(name, config as never, callback as never);
+    tools.set(name, tool);
+    return tool;
+  };
+  server.registerTool = patched as unknown as typeof server.registerTool;
   return server;
 }

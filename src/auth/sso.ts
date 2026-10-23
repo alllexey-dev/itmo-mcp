@@ -13,6 +13,8 @@ export class SsoLogin {
     private readonly idClient: ItmoIdClient,
     private readonly store: StateStore,
     private readonly credentials: Credentials,
+    /** Called when ITMO.ID rejected every known cookie, before the error is thrown. */
+    private readonly onRejected: () => Promise<void> = async () => undefined,
   ) {}
 
   async authorize(client: OidcClient): Promise<AuthorizationCode> {
@@ -28,6 +30,7 @@ export class SsoLogin {
       }
     }
 
+    if (identities.length > 0) await this.onRejected();
     throw new AuthError(
       identities.length > 0
         ? "ITMO.ID session expired: set a fresh ITMO_KEYCLOAK_IDENTITY"
