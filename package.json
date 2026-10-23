@@ -1,6 +1,6 @@
 {
   "name": "itmo-mcp",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "MCP server for ITMO University student services: my.itmo.ru and bars.itmo.ru",
   "license": "MIT",
   "author": "alllexey",
@@ -41,8 +41,11 @@
     "verify:live": "tsx scripts/verify-live.ts"
   },
   "dependencies": {
+    "@hpke/chacha20poly1305": "^1.8.0",
+    "@hpke/core": "^1.9.0",
     "@modelcontextprotocol/sdk": "^1.32.0",
     "openapi-fetch": "^0.17.0",
+    "qrcode-generator": "^2.0.4",
     "zod": "^4.6.5"
   },
   "devDependencies": {

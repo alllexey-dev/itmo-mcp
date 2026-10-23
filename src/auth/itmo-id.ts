@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { cookieHeader, type FetchFn, readSetCookies, USER_AGENT } from "../http.js";
+import { type FetchFn, readSetCookies, USER_AGENT } from "../http.js";
 import { AuthError, CredentialRejectedError } from "./errors.js";
 
 export const ITMO_ID_ISSUER = "https://id.itmo.ru/auth/realms/itmo";
@@ -48,56 +48,26 @@ export function pkcePair(): { verifier: string; challenge: string } {
   return { verifier, challenge };
 }
 
-/** Extracts the login form URL from the ITMO.ID theme, which renders the form from a JSON config. */
-export function extractLoginAction(html: string): string | undefined {
-  const json = /"loginAction"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(html);
-  if (json?.[1]) return (JSON.parse(`"${json[1]}"`) as string).replaceAll("&amp;", "&");
-  const form = /<form[^>]*\saction="([^"]+)"/i.exec(html);
-  return form?.[1]?.replaceAll("&amp;", "&");
-}
-
 export class ItmoIdClient {
   constructor(
     private readonly fetchFn: FetchFn = fetch,
     private readonly issuer: string = ITMO_ID_ISSUER,
     private readonly now: () => number = Date.now,
+    /** Sent to id.itmo.ru; the UA of a sign-in labels the session on id.itmo.ru/activity. */
+    private readonly userAgent: string = USER_AGENT,
   ) {}
 
   /** Silent SSO: one authorize request with the KEYCLOAK_IDENTITY cookie, no redirects followed. */
   async codeWithIdentity(client: OidcClient, keycloakIdentity: string): Promise<AuthorizationCode> {
     const { url, state, verifier } = this.authorizeRequest(client);
     const response = await this.fetchFn(url, {
-      headers: { Cookie: `${IDENTITY_COOKIE}=${keycloakIdentity}`, "User-Agent": USER_AGENT },
+      headers: { Cookie: `${IDENTITY_COOKIE}=${keycloakIdentity}`, "User-Agent": this.userAgent },
       redirect: "manual",
     });
     const rotated = readSetCookies(response).get(IDENTITY_COOKIE);
     const code = this.codeFromRedirect(client, response, state);
     if (!code) throw new CredentialRejectedError("ITMO.ID session (KEYCLOAK_IDENTITY) is expired or invalid");
     return { code, verifier, keycloakIdentity: rotated ?? keycloakIdentity };
-  }
-
-  /** Password login through the ITMO.ID login form, keeping Keycloak's flow cookies between the two requests. */
-  async codeWithPassword(client: OidcClient, username: string, password: string): Promise<AuthorizationCode> {
-    const { url, state, verifier } = this.authorizeRequest(client);
-    const page = await this.fetchFn(url, { headers: { "User-Agent": USER_AGENT }, redirect: "manual" });
-    const cookies = readSetCookies(page);
-    const loginAction = extractLoginAction(await page.text());
-    if (!loginAction) throw new AuthError(`ITMO.ID login page has no login form (HTTP ${page.status})`);
-
-    const response = await this.fetchFn(loginAction, {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader(cookies),
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": USER_AGENT,
-      },
-      body: new URLSearchParams({ username, password, rememberMe: "on" }),
-      redirect: "manual",
-    });
-    const identity = readSetCookies(response).get(IDENTITY_COOKIE);
-    const code = this.codeFromRedirect(client, response, state);
-    if (!code) throw new CredentialRejectedError("ITMO.ID rejected the login or password");
-    return { code, verifier, keycloakIdentity: identity };
   }
 
   async exchangeCode(client: OidcClient, authorization: AuthorizationCode): Promise<TokenSet> {
@@ -118,6 +88,17 @@ export class ItmoIdClient {
       refresh_token: refreshToken,
     });
     return this.tokenRequest(form, "refresh token");
+  }
+
+  /** OIDC logout with a refresh token: ends exactly that token's ITMO.ID session (204); other sessions live. */
+  async logout(client: OidcClient, refreshToken: string): Promise<void> {
+    const response = await this.fetchFn(`${this.issuer}/protocol/openid-connect/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": this.userAgent },
+      body: new URLSearchParams({ client_id: client.clientId, refresh_token: refreshToken }),
+    });
+    await response.body?.cancel();
+    if (!response.ok) throw new AuthError(`ITMO.ID logout failed (HTTP ${response.status})`);
   }
 
   private authorizeRequest(client: OidcClient): { url: string; state: string; verifier?: string } {
@@ -155,13 +136,16 @@ export class ItmoIdClient {
   private async tokenRequest(form: URLSearchParams, grant: string): Promise<TokenSet> {
     const response = await this.fetchFn(`${this.issuer}/protocol/openid-connect/token`, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT },
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": this.userAgent },
       body: form,
     });
     const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
     if (!response.ok || typeof body.access_token !== "string") {
       const error = typeof body.error === "string" ? body.error : `HTTP ${response.status}`;
-      if (error === "invalid_grant") throw new CredentialRejectedError(`ITMO.ID rejected the ${grant} (${error})`);
+      const description = typeof body.error_description === "string" ? `: ${body.error_description.slice(0, 100)}` : "";
+      if (error === "invalid_grant") {
+        throw new CredentialRejectedError(`ITMO.ID rejected the ${grant} (${error}${description})`);
+      }
       throw new AuthError(`ITMO.ID token request failed (${error})`);
     }
     return {

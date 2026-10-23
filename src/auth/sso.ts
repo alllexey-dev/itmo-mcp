@@ -5,7 +5,7 @@ import type { StateStore } from "./state-store.js";
 
 /**
  * Obtains authorization codes for any ITMO client from the strongest available SSO credential:
- * the stored KEYCLOAK_IDENTITY, then the one from env, then login and password.
+ * the stored KEYCLOAK_IDENTITY, then the one from env.
  * Rotated KEYCLOAK_IDENTITY values are persisted, so later logins stay silent.
  */
 export class SsoLogin {
@@ -28,17 +28,10 @@ export class SsoLogin {
       }
     }
 
-    const { username, password } = this.credentials;
-    if (username && password) {
-      const authorization = await this.idClient.codeWithPassword(client, username, password);
-      await this.remember(authorization);
-      return authorization;
-    }
-
     throw new AuthError(
       identities.length > 0
-        ? "ITMO.ID session expired: set a fresh ITMO_KEYCLOAK_IDENTITY or ITMO_USERNAME and ITMO_PASSWORD"
-        : "No ITMO credentials: set ITMO_USERNAME and ITMO_PASSWORD, ITMO_REFRESH_TOKEN or ITMO_KEYCLOAK_IDENTITY",
+        ? "ITMO.ID session expired: set a fresh ITMO_KEYCLOAK_IDENTITY"
+        : "No ITMO.ID cookie: run `itmo-mcp pair` for my.itmo.ru, or set ITMO_KEYCLOAK_IDENTITY (also needed for BARS)",
     );
   }
 

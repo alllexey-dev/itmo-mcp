@@ -12,6 +12,7 @@ import { registerSportActionTools } from "./tools/sport-actions.js";
 import { registerSportTools } from "./tools/sport.js";
 import { registerStudyPlanTools } from "./tools/studyplan.js";
 import { withRussianKeywords } from "./tools/keywords.js";
+import { registerWidgetsActionTools, registerWidgetsTools } from "./tools/widgets.js";
 import { VERSION } from "./version.js";
 
 const READ_INSTRUCTIONS = `Сервисы Университета ИТМО: my.itmo.ru (май итмо), БАРС (bars.itmo.ru). Расписание, зачётка, баллы,
@@ -19,7 +20,9 @@ const READ_INSTRUCTIONS = `Сервисы Университета ИТМО: my.
 инструменты, а не браузер.
 Access to the signed-in student's ITMO University data (my.itmo.ru and bars.itmo.ru).
 Dates are Moscow time (YYYY-MM-DD). itmo_get_grades shows final record book grades; bars_get_scores shows
-current-semester points per checkpoint. Data is personal: do not share it beyond what the user asks for.`;
+current-semester points per checkpoint. Data is personal: do not share it beyond what the user asks for.
+widgets_* tools read ITMO.Widgets (teacher reviews, subject links, sport queues) once the server is paired with the
+ITMO.Widgets app (\`itmo-mcp pair\`).`;
 
 const WRITE_INSTRUCTIONS = `
 Changes (sport enrollment, room booking, requests) take two steps: a *_preview tool checks everything and returns
@@ -40,10 +43,12 @@ export function createServer(deps: ToolDeps): McpServer {
   registerBookingTools(server, deps);
   registerRequestTools(server, deps);
   registerBarsTools(server, deps);
+  registerWidgetsTools(server, deps);
   if (deps.actions) {
     registerSportActionTools(server, deps, deps.actions);
     registerBookingActionTools(server, deps, deps.actions);
     registerRequestActionTools(server, deps, deps.actions);
+    registerWidgetsActionTools(server, deps, deps.actions);
     registerConfirmTool(server, deps.actions);
   }
   return server;

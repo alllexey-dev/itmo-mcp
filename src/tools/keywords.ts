@@ -30,6 +30,9 @@ export const RUSSIAN_KEYWORDS: Record<string, string> = {
   itmo_requests_catalog: "Каталог заявок и справок ИТМО: справка с места учёбы, справка об обучении и другие.",
   itmo_request_form: "Поля формы заявки или справки ИТМО.",
   bars_get_scores: "БАРС ИТМО (bars.itmo.ru): баллы текущего семестра по контрольным точкам, лабораторным, экзамену.",
+  widgets_get_teacher_reviews: "Отзывы о преподавателе ИТМО из ITMO.Widgets (итмо виджеты): оценки, сводка, плюсы и минусы.",
+  widgets_get_subject_links: "Ссылки и чаты предмета ИТМО из ITMO.Widgets: таблицы баллов, очереди, материалы, записи лекций.",
+  widgets_get_sport_queue: "Мои очереди на физкультуру ИТМО в ITMO.Widgets: место в очереди на занятие, автозапись.",
   itmo_sport_signup_preview: "Записаться на физкультуру ИТМО: предпросмотр записи на занятие или в секцию.",
   itmo_sport_cancel_preview: "Отписаться от занятия физкультурой ИТМО: предпросмотр.",
   itmo_sport_competition_preview: "Записаться на спортивное соревнование ИТМО или отказаться: предпросмотр.",
@@ -37,6 +40,8 @@ export const RUSSIAN_KEYWORDS: Record<string, string> = {
   itmo_booking_cancel_preview: "Отменить свою бронь аудитории ИТМО: предпросмотр.",
   itmo_request_submit_preview: "Заказать справку или подать заявку в ИТМО (my.itmo.ru): предпросмотр.",
   itmo_request_cancel_preview: "Отменить поданную заявку ИТМО: предпросмотр.",
+  widgets_sport_queue_join_preview: "Встать в очередь на физкультуру ИТМО в ITMO.Widgets (свободное место, автозапись): предпросмотр.",
+  widgets_sport_queue_leave_preview: "Выйти из очереди на физкультуру ИТМО в ITMO.Widgets: предпросмотр.",
   itmo_confirm_action: "Подтвердить действие в ИТМО после предпросмотра: запись, бронь, заявка, отмена.",
 };
 

@@ -5,6 +5,8 @@ All fixtures are synthetic. They contain no real names, ISU numbers or other per
 - Files without a `-live` origin below come from the MIT-licensed
   [my-itmo-api](https://github.com/alllexey-dev/my-itmo-api) KMP fixtures
   (`kmp/fixtures/<area>/<case>.json`, commit `9bac3ed`).
+- `widgets/*.json` are the golden HTTP fixtures of ITMO.Widgets Backend
+  (`src/test/resources/contract/http/<area>/<case>.json`, alllexey-dev/itmo-widgets-backend#58, commit `97f6a74`).
 - These files were captured from the live services and passed through
   `scripts/sanitize-fixture.ts`, which keeps only the response shape:
   - `my-itmo/recordbook/specializations.json`

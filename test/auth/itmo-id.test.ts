@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { AuthError, CredentialRejectedError } from "../../src/auth/errors.js";
 import {
   BARS_CLIENT,
-  extractLoginAction,
   isuFromAccessToken,
   ItmoIdClient,
   MY_ITMO_CLIENT,
@@ -12,7 +11,7 @@ import {
 import { accessToken, html, json, redirect, stubFetch } from "../support/fetch.js";
 import { callback, invalidGrant, isAuthorize, tokenResponse } from "../support/itmo-id.js";
 
-const LOGIN_PAGE = `<script>const kcContext = { "loginAction": "https:\\/\\/id.itmo.ru\\/auth\\/realms\\/itmo\\/login-actions\\/authenticate?session_code=s&amp;execution=e", "loginUrl": "x" }</script>`;
+const LOGIN_PAGE = `<script>const kcContext = { "loginAction": "https://id.itmo.ru/login-actions/authenticate" }</script>`;
 
 describe("pkcePair", () => {
   it("derives the S256 challenge from the verifier", () => {
@@ -20,24 +19,6 @@ describe("pkcePair", () => {
 
     expect(challenge).toBe(createHash("sha256").update(verifier).digest("base64url"));
     expect(verifier).toMatch(/^[A-Za-z0-9_-]{43}$/);
-  });
-});
-
-describe("extractLoginAction", () => {
-  it("reads the JSON theme config and unescapes it", () => {
-    expect(extractLoginAction(LOGIN_PAGE)).toBe(
-      "https://id.itmo.ru/auth/realms/itmo/login-actions/authenticate?session_code=s&execution=e",
-    );
-  });
-
-  it("falls back to a classic form action", () => {
-    expect(extractLoginAction(`<form id="kc" action="https://id/login?a=1&amp;b=2" method="post">`)).toBe(
-      "https://id/login?a=1&b=2",
-    );
-  });
-
-  it("returns undefined when there is no form", () => {
-    expect(extractLoginAction("<html></html>")).toBeUndefined();
   });
 });
 
@@ -86,39 +67,25 @@ describe("ItmoIdClient.codeWithIdentity", () => {
   });
 });
 
-describe("ItmoIdClient.codeWithPassword", () => {
-  it("posts credentials with the login flow cookies and captures KEYCLOAK_IDENTITY", async () => {
-    let authorizeCall: Parameters<typeof callback>[0] | undefined;
-    const fetchFn = stubFetch((call) => {
-      if (isAuthorize(call)) {
-        authorizeCall = call;
-        return html(LOGIN_PAGE, ["AUTH_SESSION_ID=sess; Path=/", "KC_RESTART=r; Path=/"]);
-      }
-      return callback(authorizeCall!, "pw-code", ["KEYCLOAK_IDENTITY=fresh; Path=/", "KEYCLOAK_SESSION=x; Path=/"]);
+describe("ItmoIdClient.logout", () => {
+  it("ends the session of a refresh token with the my.itmo.ru client", async () => {
+    const fetchFn = stubFetch(() => new Response(null, { status: 204 }));
+
+    await new ItmoIdClient(fetchFn, undefined, undefined, "test-agent").logout(MY_ITMO_CLIENT, "refresh-1");
+
+    const call = fetchFn.calls[0]!;
+    expect(`${call.method} ${call.url.pathname}`).toBe("POST /auth/realms/itmo/protocol/openid-connect/logout");
+    expect(Object.fromEntries(new URLSearchParams(call.body))).toEqual({
+      client_id: "student-personal-cabinet",
+      refresh_token: "refresh-1",
     });
-
-    const result = await new ItmoIdClient(fetchFn).codeWithPassword(MY_ITMO_CLIENT, "user", "secret");
-
-    const post = fetchFn.calls[1]!;
-    expect(post.method).toBe("POST");
-    expect(post.url.pathname).toBe("/auth/realms/itmo/login-actions/authenticate");
-    expect(post.headers.get("cookie")).toBe("AUTH_SESSION_ID=sess; KC_RESTART=r");
-    expect(new URLSearchParams(post.body).get("username")).toBe("user");
-    expect(result).toMatchObject({ code: "pw-code", keycloakIdentity: "fresh" });
+    expect(call.headers.get("user-agent")).toBe("test-agent");
   });
 
-  it("rejects wrong credentials (login page shown again)", async () => {
-    const fetchFn = stubFetch(() => html(LOGIN_PAGE));
+  it("fails on an error answer", async () => {
+    const fetchFn = stubFetch(() => json({ error: "invalid_grant" }, 400));
 
-    await expect(new ItmoIdClient(fetchFn).codeWithPassword(MY_ITMO_CLIENT, "user", "bad")).rejects.toBeInstanceOf(
-      CredentialRejectedError,
-    );
-  });
-
-  it("fails clearly when the login page has no form", async () => {
-    const fetchFn = stubFetch(() => html("<html>maintenance</html>"));
-
-    await expect(new ItmoIdClient(fetchFn).codeWithPassword(MY_ITMO_CLIENT, "u", "p")).rejects.toThrow(/login form/);
+    await expect(new ItmoIdClient(fetchFn).logout(MY_ITMO_CLIENT, "r")).rejects.toThrow(/logout failed \(HTTP 400\)/);
   });
 });
 
