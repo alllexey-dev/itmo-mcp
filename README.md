@@ -106,6 +106,8 @@ npx -y itmo-mcp setup
 - Если отключить сервер в приложении, при следующем запросе он сам завершит свою сессию ITMO.ID и сотрёт данные.
 - Через подключение доступен только my.itmo.ru. **Инструменты БАРС** работают только с `ITMO_KEYCLOAK_IDENTITY`
   ниже, на ваш риск: эта cookie даёт полный доступ к аккаунту ITMO.ID, поэтому приложение её не передаёт.
+- Сервер показывает только инструменты, которые сейчас могут работать: `bars_*` - пока есть `ITMO_KEYCLOAK_IDENTITY`,
+  которую ITMO.ID принимает, `widgets_*` - после подключения к приложению.
 
 ### Без приложения (переменные окружения)
 
@@ -180,7 +182,7 @@ startup_timeout_sec = 60
 Подключение сохраняется в томе `itmo-mcp`:
 
 ```bash
-docker run -it --rm -v itmo-mcp:/state ghcr.io/alllexey-dev/itmo-mcp:v0.3.0 pair
+docker run -it --rm -v itmo-mcp:/state ghcr.io/alllexey-dev/itmo-mcp:v0.3.1 pair
 ```
 
 ```json
@@ -188,7 +190,7 @@ docker run -it --rm -v itmo-mcp:/state ghcr.io/alllexey-dev/itmo-mcp:v0.3.0 pair
   "mcpServers": {
     "itmo": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "-v", "itmo-mcp:/state", "ghcr.io/alllexey-dev/itmo-mcp:v0.3.0", "--stdio"]
+      "args": ["run", "-i", "--rm", "-v", "itmo-mcp:/state", "ghcr.io/alllexey-dev/itmo-mcp:v0.3.1", "--stdio"]
     }
   }
 }
@@ -204,7 +206,7 @@ docker run -d --name itmo-mcp -p 8080:8080 \
   -e ITMO_MCP_HTTP_TOKEN="$(openssl rand -hex 32)" \
   -e ITMO_MCP_HTTP_ALLOWED_HOSTS=mcp.example.com \
   -v itmo-mcp:/state \
-  ghcr.io/alllexey-dev/itmo-mcp:v0.3.0
+  ghcr.io/alllexey-dev/itmo-mcp:v0.3.1
 ```
 
 | Переменная | Назначение |

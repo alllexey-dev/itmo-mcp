@@ -21,6 +21,8 @@ export function createHttpServer(deps: ToolDeps, options: HttpOptions): Server {
     if (options.token && !authorized(req, options.token)) return send(res, 401, { error: "Unauthorized" });
     if (req.method !== "POST") return send(res, 405, { error: "Method not allowed: this server is stateless, use POST" });
 
+    // Stateless: every request gets a fresh server, so it lists exactly the tools that can work now.
+    await deps.availability?.refresh();
     const server = createServer(deps);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,

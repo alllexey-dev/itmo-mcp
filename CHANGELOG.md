@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 - 2026-10-23
+
+- Tools that cannot work are not listed: `bars_*` without a `KEYCLOAK_IDENTITY` or once ITMO.ID rejected it (back
+  with a new cookie), `widgets_*` without a pairing. A stdio client gets `tools/list_changed` when that changes; in
+  HTTP mode every request lists what works at that moment. Agents stop calling BARS on a dead cookie.
+
 ## 0.3.0 - 2026-10-22
 
 Connecting through the ITMO.Widgets app (ITMO.Widgets `vibe/plans/connected-clients-plan.md`, Backend

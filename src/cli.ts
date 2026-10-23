@@ -90,6 +90,7 @@ async function main(): Promise<void> {
     console.error("itmo-mcp: not connected and no ITMO credentials; tools will return an error. Run `itmo-mcp pair`.");
   }
 
+  await deps.availability?.refresh();
   if (!values.http) {
     await createServer(deps).connect(new StdioServerTransport());
     return;
