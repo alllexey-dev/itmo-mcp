@@ -1,10 +1,35 @@
-# itmo-mcp
+<h1 align="center">itmo-mcp</h1>
+
+<p align="center">
+  <strong>ИТМО для ИИ-ассистентов</strong>
+  <br />
+  MCP-сервер my.itmo.ru, БАРС и ITMO.Widgets для Claude, Codex, Cursor и других клиентов
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/itmo-mcp"><img src="https://img.shields.io/npm/v/itmo-mcp?style=flat-square&color=blue" alt="npm" /></a>
+  <a href="https://github.com/alllexey-dev/itmo-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/alllexey-dev/itmo-mcp/ci.yml?branch=main&style=flat-square&label=CI" alt="CI" /></a>
+  <img src="https://img.shields.io/badge/Node.js-20%2B-5FA04E?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 20+" />
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/alllexey-dev/itmo-mcp?style=flat-square" alt="MIT" /></a>
+</p>
+
+<p align="center">
+  <a href="#быстрый-старт"><strong>Быстрый старт</strong></a> ·
+  <a href="#что-умеет">Что умеет</a> ·
+  <a href="#подключение">Подключение</a> ·
+  <a href="#приватность">Приватность</a> ·
+  <a href="CHANGELOG.md">История изменений</a>
+</p>
 
 MCP-сервер для сервисов Университета ИТМО: [my.itmo.ru](https://my.itmo.ru) и [БАРС](https://bars.itmo.ru), а также
-[ITMO.Widgets](https://widgets.alllexey.dev) (отзывы о преподавателях, ссылки предметов, очереди на физкультуру).
-Подключите его к Claude, Codex, Cursor или другому MCP-клиенту и спрашивайте обычным языком:
-"какие пары завтра?", "сколько баллов по матану в БАРС?", "куда записаться на волейбол на этой неделе?",
-"что пишут про преподавателя по матану?".
+[ITMO.Widgets](https://widgets.alllexey.dev) (отзывы о преподавателях, ссылки к предметам, очереди на физкультуру).
+MCP (Model Context Protocol) - стандартный способ дать ИИ-ассистенту доступ к внешним данным. Подключите сервер
+к своему ассистенту и спрашивайте обычным языком:
+
+- "какие пары завтра?"
+- "сколько баллов по матану в зачётке?"
+- "куда записаться на волейбол на этой неделе?"
+- "что пишут про преподавателя по матану?"
 
 По умолчанию сервер только читает данные. Запись на физкультуру, бронирование аудиторий и подачу заявок
 можно включить отдельно (см. "Изменение данных"): каждое действие сначала показывается и выполняется
@@ -12,40 +37,60 @@ MCP-сервер для сервисов Университета ИТМО: [my.
 
 > Неофициальный проект. Не связан с Университетом ИТМО. API сервисов может измениться без предупреждения.
 
-## Быстрая настройка через агента
+## Быстрый старт
 
-Отправьте своему агенту (Claude Code, Codex, Cursor):
+Нужны [Node.js](https://nodejs.org) 20 или новее и приложение
+[ITMO.Widgets](https://github.com/alllexey-dev/ITMO.Widgets) на телефоне.
+
+```bash
+npx -y itmo-mcp setup
+```
+
+Команда показывает QR-код: отсканируйте его в приложении (Профиль -> Устройства -> «Подключить устройство»),
+и она предложит добавить сервер в Claude Code, Codex и Cursor. После этого спросите ассистента, какие пары
+завтра.
+
+Можно поручить настройку самому агенту (Claude Code, Codex, Cursor). Отправьте ему:
 
 ```text
 Настрой мне MCP-сервер itmo-mcp по README https://github.com/alllexey-dev/itmo-mcp
 ```
 
+Шаги подключения подробно, вход без приложения и другие клиенты: "Вход в ИТМО" и "Подключение" ниже.
+
 ## Что умеет
 
 | Инструмент | Что возвращает |
 |---|---|
+| **Учёба** | |
 | `itmo_get_profile` | Ваш профиль: ИСУ, ФИО, факультет, группа, курс |
 | `itmo_get_schedule` | Расписание пар за период (по умолчанию 7 дней) |
 | `itmo_get_grades` | Зачётка за семестр: баллы, оценки, тип контроля |
 | `itmo_get_grade_details` | Разбивка баллов по одной дисциплине зачётки |
 | `itmo_get_study_plan` | Дисциплины учебного плана за семестр: ЗЕТ, часы, кафедра |
 | `bars_get_scores` | Баллы БАРС текущего семестра по контрольным точкам |
+| `itmo_get_election_status` | Сроки выбора дисциплин |
+| **Физкультура** | |
 | `itmo_get_sport_status` | Физкультура: баллы, секции, ближайшие занятия, долги |
 | `itmo_get_sport_points_history` | История начисления баллов по физкультуре |
 | `itmo_get_sport_schedule` | Занятия по физкультуре со свободными местами |
 | `itmo_get_sport_filters` | Виды спорта, корпуса и семестры для фильтров |
 | `itmo_get_sport_competitions` | Спортивные соревнования |
+| **Стипендия и общежитие** | |
 | `itmo_get_scholarship` | Стипендия и выплаты: суммы по категориям и история |
 | `itmo_get_dormitory` | Общежитие: статус, договор, баланс и график оплаты |
+| **Аудитории и электронная очередь** | |
 | `itmo_get_room_bookings` | Ваши брони аудиторий и коворкингов |
-| `itmo_get_queue_appointments` | Записи в электронную очередь |
-| `itmo_get_requests` | Ваши заявки и справки |
-| `itmo_get_election_status` | Сроки выбора дисциплин |
-| `itmo_search_people`, `itmo_get_person` | Поиск студентов и сотрудников, профиль по ИСУ |
 | `itmo_booking_places`, `itmo_booking_search_rooms` | Где можно забронировать аудиторию или коворкинг |
 | `itmo_booking_availability` | Свободное время комнат на дату (чужие брони только как "занято") |
+| `itmo_get_queue_appointments` | Записи в электронную очередь |
+| **Заявки и справки** | |
+| `itmo_get_requests` | Ваши заявки и справки |
 | `itmo_requests_catalog`, `itmo_request_form` | Какие справки и заявки можно подать, поля формы |
 | `itmo_get_request_details` | Статус и поля поданной заявки |
+| **Люди** | |
+| `itmo_search_people`, `itmo_get_person` | Поиск студентов и сотрудников, профиль по ИСУ |
+| **ITMO.Widgets** | |
 | `widgets_get_teacher_reviews` | Отзывы о преподавателе из ITMO.Widgets и сводка по ним (доступ «Отзывы о преподавателях») |
 | `widgets_get_subject_links` | Ссылки и чаты предмета от однокурсников (доступ «Ссылки предметов») |
 | `widgets_get_sport_queue` | Ваши очереди на физкультуру в ITMO.Widgets (доступ «Очереди на физкультуру») |
@@ -53,9 +98,14 @@ MCP-сервер для сервисов Университета ИТМО: [my.
 Инструменты `widgets_*` работают после подключения через приложение ITMO.Widgets (см. "Вход в ИТМО"). Если
 нужного доступа нет, инструмент скажет, какой переключатель включить в приложении: Профиль -> Устройства.
 
+`bars_get_scores` появляется только с cookie `ITMO_KEYCLOAK_IDENTITY`: подключение через приложение БАРС не
+открывает (см. "Без приложения").
+
 ## Изменение данных
 
-Включается переменной `ITMO_MCP_ENABLE_WRITES=true` и добавляет инструменты:
+Включается переменной окружения `ITMO_MCP_ENABLE_WRITES=true`. Запустите с ней настройку
+(`ITMO_MCP_ENABLE_WRITES=true npx -y itmo-mcp setup`), и команда перенесёт её в настройки клиентов; в уже
+настроенном клиенте добавьте её в `env` MCP-сервера. Переменная добавляет инструменты:
 
 | Инструмент | Что делает |
 |---|---|
@@ -89,7 +139,7 @@ npx -y itmo-mcp setup
 1. В приложении ITMO.Widgets: Профиль -> Устройства -> «Подключить устройство», отсканируйте QR или вставьте
    ссылку из терминала. Ссылка действует 2 минуты, не пересылайте её.
 2. Сверьте код проверки в терминале и на телефоне, выберите доступы и войдите в ITMO.ID в окне приложения.
-3. Телефон передаёт серверу зашифрованный вход: отдельную сессию ITMO.ID только для этого сервера (на
+3. Телефон передаёт MCP-серверу зашифрованный вход: отдельную сессию ITMO.ID только для этого сервера (на
    [id.itmo.ru/activity](https://id.itmo.ru/activity) это отдельная строка) и токен ITMO.Widgets. Ни пароль, ни
    cookie телефона сервер не получает.
 
@@ -133,8 +183,6 @@ ITMO.ID меняет токены при каждом входе. Сервер �
 | `ITMO_WIDGETS_URL` | Сервер ITMO.Widgets, по умолчанию `https://widgets.alllexey.dev` |
 
 ## Подключение
-
-Нужен [Node.js](https://nodejs.org) 20 или новее.
 
 ### Claude Desktop
 
@@ -235,7 +283,20 @@ codex mcp add itmo --url https://mcp.example.com/mcp --bearer-token-env ITMO_MCP
 - Ответы инструментов попадают в контекст модели и, значит, к провайдеру LLM, которым вы пользуетесь.
 - Токены и cookie не попадают в ответы инструментов и в логи.
 
-## OpenAPI и клиент
+## Экосистема
+
+| Репозиторий | Что это |
+|---|---|
+| [ITMO.Widgets](https://github.com/alllexey-dev/ITMO.Widgets) | Приложение для Android и iPhone |
+| [itmo-widgets-backend](https://github.com/alllexey-dev/itmo-widgets-backend) | Сервер: друзья, приватность, очереди на спорт, отзывы, уведомления |
+| [itmo-widgets-web](https://github.com/alllexey-dev/itmo-widgets-web) | Сайт и веб-версия |
+| [itmo-widgets-agent](https://github.com/alllexey-dev/itmo-widgets-agent) | Агент для компьютера или сервера: автозапись на спорт без телефона |
+| **itmo-mcp** (этот репозиторий) | MCP-сервер ИТМО для Claude, Codex, Cursor и других ассистентов |
+| [my-itmo-api](https://github.com/alllexey-dev/my-itmo-api) | Библиотека для My ITMO и БАРС: Kotlin Multiplatform и Java |
+
+## Разработчикам
+
+### OpenAPI и клиент
 
 В `openapi/` лежат описания API (OpenAPI 3.1), восстановленные по веб-клиентам и проверенные на живых ответах:
 
@@ -252,14 +313,14 @@ const { my } = createToolDeps(loadConfig());
 const requests = await result("getMyRequests", my.GET("/api/requests/my"));
 ```
 
-## Исследование API ИТМО
+### Исследование API ИТМО
 
 В папке [`research/`](research/) собрана документация по студенческим сервисам ИТМО (my.itmo.ru, БАРС, бэкенды
 мобильного приложения и другие): откуда данные, как устроена авторизация, карта хостов и отдельный документ на
 каждый сервис с таблицей ручек и статусом проверки. Там же лежат исследовательские OpenAPI-спецификации для ручек,
 которых нет в контракте выше. Это справочный материал, а не часть сервера.
 
-## Разработка
+### Сборка и тесты
 
 ```bash
 npm install
@@ -273,10 +334,10 @@ npm run build
 `verify:live` выводит только названия операций, HTTP-статусы и пути ошибок схемы, без самих данных.
 Новые фикстуры добавляйте только после `scripts/sanitize-fixture.ts`, он убирает персональные данные.
 
-## Изменения
+## Обратная связь
 
-См. [CHANGELOG.md](CHANGELOG.md).
+Ошибки и идеи: [Issues](https://github.com/alllexey-dev/itmo-mcp/issues) или [@itmowidgets](https://t.me/itmowidgets).
 
 ## Лицензия
 
-MIT
+[MIT](LICENSE).
