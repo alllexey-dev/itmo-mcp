@@ -38,6 +38,8 @@
     "gen": "openapi-typescript openapi/my-itmo.yaml -o src/generated/my-itmo.ts && openapi-typescript openapi/bars.yaml -o src/generated/bars.ts",
     "prepublishOnly": "npm run build",
     "gen:check": "node scripts/gen-check.mjs",
+    "spec:sync": "node scripts/sync-spec.mjs",
+    "spec:check": "node scripts/sync-spec.mjs --check",
     "verify:live": "tsx scripts/verify-live.ts"
   },
   "dependencies": {

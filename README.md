@@ -298,13 +298,9 @@ codex mcp add itmo --url https://mcp.example.com/mcp --bearer-token-env ITMO_MCP
 
 ### OpenAPI и клиент
 
-В `openapi/` лежат описания API (OpenAPI 3.1), восстановленные по веб-клиентам и проверенные на живых ответах:
-
-- `openapi/my-itmo.yaml`: расписание, зачётка, учебный план, физкультура, финансы, общежитие и другое;
-- `openapi/bars.yaml`: БАРС.
-
-По ним сгенерирован типизированный клиент на [openapi-fetch](https://openapi-ts.dev/openapi-fetch/), который можно
-использовать как библиотеку:
+Сервер ходит в my.itmo.ru и БАРС через типизированный клиент на
+[openapi-fetch](https://openapi-ts.dev/openapi-fetch/), сгенерированный из двух спецификаций OpenAPI 3.1 в
+`openapi/`. Его можно использовать как библиотеку:
 
 ```ts
 import { createToolDeps, loadConfig, result } from "itmo-mcp";
@@ -313,12 +309,15 @@ const { my } = createToolDeps(loadConfig());
 const requests = await result("getMyRequests", my.GET("/api/requests/my"));
 ```
 
-### Исследование API ИТМО
+### Описание API ИТМО
 
-В папке [`research/`](research/) собрана документация по студенческим сервисам ИТМО (my.itmo.ru, БАРС, бэкенды
-мобильного приложения и другие): откуда данные, как устроена авторизация, карта хостов и отдельный документ на
-каждый сервис с таблицей ручек и статусом проверки. Там же лежат исследовательские OpenAPI-спецификации для ручек,
-которых нет в контракте выше. Это справочный материал, а не часть сервера.
+Разбор API сервисов ИТМО живёт в отдельном репозитории:
+[my-itmo-api/spec](https://github.com/alllexey-dev/my-itmo-api/tree/master/spec). Там описаны вход через ITMO.ID,
+карта хостов, общие правила ответов, отдельный документ на каждый сервис и все спецификации OpenAPI с примерами
+ответов. По ним можно написать свой клиент на любом языке.
+
+`openapi/my-itmo.yaml` и `openapi/bars.yaml` здесь - копии спецификаций оттуда. Править их нужно в my-itmo-api,
+а сюда переносить командой `npm run spec:sync`.
 
 ### Сборка и тесты
 
@@ -326,7 +325,8 @@ const requests = await result("getMyRequests", my.GET("/api/requests/my"));
 npm install
 npm test             # юнит-тесты и проверка спек на фикстурах
 npm run lint:spec    # линтер OpenAPI
-npm run gen          # перегенерировать src/generated после правки openapi/
+npm run spec:sync    # обновить openapi/ из my-itmo-api
+npm run gen          # перегенерировать src/generated после обновления openapi/
 npm run verify:live  # сверить спеки с живыми ответами (нужны ITMO_* переменные)
 npm run build
 ```

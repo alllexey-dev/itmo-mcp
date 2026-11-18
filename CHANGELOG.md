@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- The API research (`research/`) moved to [my-itmo-api/spec](https://github.com/alllexey-dev/my-itmo-api/tree/master/spec).
+  `openapi/my-itmo.yaml` and `openapi/bars.yaml` are now copies of the specifications there: `npm run spec:sync`
+  updates them, `npm run spec:check` and the weekly `spec-drift` workflow report a difference.
+
 ## 0.3.1 - 2026-10-23
 
 - Tools that cannot work are not listed: `bars_*` without a `KEYCLOAK_IDENTITY` or once ITMO.ID rejected it (back

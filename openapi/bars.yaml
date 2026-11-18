@@ -2,14 +2,15 @@ openapi: 3.1.0
 info:
   title: bars.itmo.ru (unofficial)
   version: 0.1.0
-  summary: Read-only subset of the ITMO point-rating system (BARS) REST API for students.
+  summary: Verified read-only subset of the ITMO point-rating system (BARS) REST API for students.
   description: |
     Unofficial, reverse-engineered contract of the BARS backend used by https://bars.itmo.ru.
 
     Login: obtain an ITMO.ID authorization code for the public client `bars` with redirect URI
     `https://bars.itmo.ru/rest/login` (scope `openid`, no PKCE), then call `barsLogin`. The session
     is the raw value of the `authorization` response header (`Bearer ...`); it lives about 30 minutes
-    and is sent back as the `Authorization` request header.
+    and is sent back as the `Authorization` request header. The whole flow, step by step:
+    [auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md).
 
     Data is scoped to the period selected in the user's personal settings (`selected_year`,
     `selected_term`). Changing the period (`POST /config/personal`) also changes it in the web UI,
@@ -18,7 +19,15 @@ info:
     Student journal lookup: `getDisciplines` -> `checkpoint_plan_ids` -> `getGroupsAndFlows(checkpointPlanId)`
     -> `type` + `identifier` -> `getStudentJournal`.
 
-    Timestamps (`created_at`, `updated_at`) are epoch milliseconds.
+    Responses are bare JSON without an envelope; errors are Spring error bodies. Timestamps
+    (`created_at`, `updated_at`) are epoch milliseconds. See [conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md)
+    and [services/bars.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/services/bars.md).
+
+    Verification status: every operation is checked against live responses of a student account.
+
+    This file is the source of the generated client in
+    [itmo-mcp](https://github.com/alllexey-dev/itmo-mcp); additional endpoints of the same host
+    are in `bars-extra.yaml`.
   license:
     name: MIT
     identifier: MIT
@@ -120,7 +129,9 @@ paths:
       operationId: getGroupsAndFlows
       tags: [journal]
       summary: Groups and flows that address a journal
-      description: For students, filter by `checkpointPlanId`; `disciplineId` alone was observed to return 400.
+      description: >-
+        Both filters work for students (checked 2026-11-18). An unknown identifier returns an empty list;
+        a non-integer value returns 400.
       parameters:
         - name: checkpointPlanId
           in: query
@@ -181,7 +192,11 @@ components:
     barsSession:
       type: http
       scheme: bearer
-      description: Value of the `authorization` header returned by barsLogin.
+      description: |
+        BARS session from barsLogin. The `authorization` response header of barsLogin already has the form
+        `Bearer <token>`; the bearer token of this scheme is the part after `Bearer `. A hand-written client
+        sends the header value back unchanged as `Authorization`. A generated client that adds `Bearer `
+        itself must be given the value without that prefix, otherwise it sends `Bearer Bearer ...`.
   responses:
     Error:
       description: Spring error body
