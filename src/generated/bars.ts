@@ -81,7 +81,7 @@ export interface paths {
         };
         /**
          * Groups and flows that address a journal
-         * @description For students, filter by `checkpointPlanId`; `disciplineId` alone was observed to return 400.
+         * @description Both filters work for students (checked 2026-11-18). An unknown identifier returns an empty list; a non-integer value returns 400.
          */
         get: operations["getGroupsAndFlows"];
         put?: never;

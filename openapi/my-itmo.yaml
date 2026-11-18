@@ -2,16 +2,28 @@ openapi: 3.1.0
 info:
   title: my.itmo.ru (unofficial)
   version: 0.1.0
-  summary: Read-only subset of the ITMO University student portal API.
+  summary: Verified subset of the ITMO University student portal API.
   description: |
     Unofficial, reverse-engineered contract of https://my.itmo.ru used by the ITMO web portal.
     Authentication is an ITMO.ID (Keycloak realm `itmo`) access token for the public client
-    `student-personal-cabinet`, sent as `Authorization: Bearer`. Responses are localized by
-    `Accept-Language` (`ru` or `en`).
+    `student-personal-cabinet`, sent as `Authorization: Bearer`. How to obtain and refresh it:
+    [auth.md](../auth.md). Responses are localized by `Accept-Language` (`ru` or `en`).
 
     Most endpoints wrap payloads in `ResultResponse` (`error_code` 0 means success); schedule
-    endpoints use `DataResponse` (`code` 0 means success). Schemas allow unknown properties:
+    endpoints use `DataResponse` (`code` 0 means success). Envelopes, error codes, date formats
+    and known quirks: [conventions.md](../conventions.md). Schemas allow unknown properties:
     the server adds fields without notice.
+
+    Verification status: every GET operation is checked against live responses of a student
+    account. Of the write operations, sport lesson sign-up and cancellation, room booking and
+    cancellation, the request form update, request submission and withdrawal were performed
+    on a live account and rolled back; lesson group and competition sign-up are modelled from
+    the portal code. The service documents in [services/](../services/) give the status of
+    every endpoint.
+
+    This file is the source of the generated client in
+    [itmo-mcp](https://github.com/alllexey-dev/itmo-mcp); additional endpoints of the same host
+    are in `my-itmo-extra.yaml`.
   license:
     name: MIT
     identifier: MIT
