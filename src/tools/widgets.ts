@@ -6,7 +6,7 @@ import type { ToolDeps } from "./deps.js";
 import { PREVIEW, READ_ONLY, run, ToolRefusal } from "./format.js";
 
 /** Scopes of an `mcp` connection with the titles the app shows on its switches (Backend `scopes_ru.properties`). */
-const SCOPES = {
+export const SCOPES = {
   "reviews:read": "Отзывы о преподавателях",
   "links:read": "Ссылки предметов",
   "sport:queue": "Очереди на физкультуру",

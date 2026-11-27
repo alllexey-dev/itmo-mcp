@@ -5,6 +5,10 @@ import { join } from "node:path";
 export interface AuthState {
   /** my.itmo.ru refresh token: of the paired session when `connection` is set, else of the env credentials. */
   refreshToken?: string;
+  /**
+   * `KEYCLOAK_IDENTITY` of id.itmo.ru: of the paired session when the connection holds `itmo:sso`, else the
+   * rotated env cookie. Grants every ITMO service: never logged.
+   */
   keycloakIdentity?: string;
   connection?: Connection;
 }
@@ -16,11 +20,14 @@ export interface Connection {
   id: string;
   name: string;
   isu: number;
-  itmo: {
+  /** ITMO grants the phone sealed (`itmo:refresh:...`, `itmo:sso`); absent on a protocol 1 pairing (refresh only). */
+  itmoGrants?: string[];
+  /** The ITMO.ID session; absent when the user turned every ITMO grant off (only `widgets_*` tools work). */
+  itmo?: {
     sid: string;
     expiresAt: string;
     refreshExpiresAt?: string;
-    /** `closed` once ITMO.ID refused the session's refresh token; `itmo-mcp renew` brings a new session. */
+    /** `closed` once ITMO.ID refused the session's credentials; `itmo-mcp renew` brings a new session. */
     status: "ok" | "closed";
   };
 }

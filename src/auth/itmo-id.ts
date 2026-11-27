@@ -158,12 +158,23 @@ export class ItmoIdClient {
 
 /** Reads the `isu` claim from an ITMO.ID access token without verifying it (the token came from ITMO.ID directly). */
 export function isuFromAccessToken(accessToken: string): number | undefined {
-  const payload = accessToken.split(".")[1];
+  const isu = Number(tokenClaims(accessToken)?.isu);
+  return Number.isSafeInteger(isu) && isu > 0 ? isu : undefined;
+}
+
+/** The ITMO.ID session id of a token: its `sid` claim, or `session_state` on older Keycloak versions. */
+export function sessionIdOfToken(token: string): string | undefined {
+  const claims = tokenClaims(token);
+  const sid = claims?.sid ?? claims?.session_state;
+  return typeof sid === "string" && sid !== "" ? sid : undefined;
+}
+
+function tokenClaims(token: string): Record<string, unknown> | undefined {
+  const payload = token.split(".")[1];
   if (!payload) return undefined;
   try {
-    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { isu?: unknown };
-    const isu = Number(claims.isu);
-    return Number.isSafeInteger(isu) && isu > 0 ? isu : undefined;
+    const claims: unknown = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    return claims && typeof claims === "object" ? (claims as Record<string, unknown>) : undefined;
   } catch {
     return undefined;
   }

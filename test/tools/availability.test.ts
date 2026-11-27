@@ -91,4 +91,44 @@ describe("tool availability", () => {
     expect(names).toContain("bars_get_scores");
     expect(names).toContain("widgets_get_teacher_reviews");
   });
+
+  it("lists BARS for a pairing with the itmo:sso grant and its cookie, without env", async () => {
+    const state = store();
+    await state.update({ keycloakIdentity: "paired-cookie", connection: { ...CONNECTION, itmoGrants: ["itmo:sso"] } });
+    const availability = new ToolAvailability(state);
+    await availability.refresh();
+
+    expect(await (await listed(availability)).names()).toContain("bars_get_scores");
+  });
+
+  it("hides BARS for a pairing without itmo:sso and no env cookie, and once the paired session is closed", async () => {
+    const state = store();
+    await state.update({ refreshToken: "paired", connection: CONNECTION });
+    const availability = new ToolAvailability(state);
+    await availability.refresh();
+    const client = await listed(availability);
+    const withoutGrant = await client.names();
+
+    await state.update({ keycloakIdentity: "paired-cookie", connection: { ...CONNECTION, itmoGrants: ["itmo:sso"], itmo: { ...CONNECTION.itmo, status: "closed" } } });
+    await availability.refresh();
+    const closed = await client.names();
+
+    expect(withoutGrant).not.toContain("bars_get_scores");
+    expect(closed).not.toContain("bars_get_scores");
+  });
+
+  it("a pairing without any ITMO grant lists no itmo_* tools (BARS still with an env cookie)", async () => {
+    const state = store();
+    await state.update({ connection: { token: "iwc_test", id: "c1", name: "hub", isu: 123456, itmoGrants: [] } });
+    const availability = new ToolAvailability(state, "env-cookie");
+    await availability.refresh();
+
+    const names = await (await listed(availability)).names();
+
+    expect(availability.myItmoAvailable).toBe(false);
+    expect(names.length).toBeGreaterThan(0);
+    expect(names.filter((name) => name.startsWith("itmo_"))).toEqual([]);
+    expect(names).toContain("widgets_get_teacher_reviews");
+    expect(names).toContain("bars_get_scores");
+  });
 });

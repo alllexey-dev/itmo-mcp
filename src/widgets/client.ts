@@ -2,6 +2,7 @@ import { arch } from "node:os";
 import type { FetchFn } from "../http.js";
 import { USER_AGENT } from "../http.js";
 import { VERSION } from "../version.js";
+import { CLIENT_ID } from "./crypto.js";
 
 /** ITMO.Widgets Backend answered with an error; `code` is the envelope's error code (`unauthorized`, ...). */
 export class WidgetsApiError extends Error {
@@ -29,9 +30,19 @@ export interface ScopeInfo {
   description: string;
 }
 
+/** One grant a protocol 2 challenge requests; `required` absent = the registry's default. */
+export interface GrantRequest {
+  id: string;
+  required?: boolean;
+}
+
 export interface ConnectionInfo {
   id: string;
+  /** The kind (`mcp`). */
   client: string;
+  /** Protocol 2 Backend: the registry id (`itmo-mcp`) and the ITMO grants the phone said it sealed. */
+  clientId?: string;
+  itmoGrants?: string[];
   name: string;
   scopes: { scope: ScopeInfo; granted: boolean }[];
   itmo?: { sid: string; expiresAt: string } | null;
@@ -89,18 +100,28 @@ export class WidgetsClient {
     return new WidgetsClient(this.origin, async () => token, this.fetchFn, this.onRevoked);
   }
 
+  /**
+   * A new `CONNECT` challenge. With `grants` it is protocol 2 (`clientId`, grants chosen on the phone); without,
+   * protocol 1 (`client: "mcp"`, `scopes`) as released apps understand it.
+   */
   createChallenge(body: {
     keyCommitment: string;
     name: string;
     version: string;
     platform?: string;
     scopes?: string[];
+    grants?: GrantRequest[];
   }): Promise<CreatedChallenge> {
-    return this.call("createChallenge", "POST", "/api/pair/challenges", { kind: "CONNECT", client: "mcp", ...body }, false);
+    const { grants, scopes, ...rest } = body;
+    const request = grants
+      ? { kind: "CONNECT", clientId: CLIENT_ID, ...rest, grants }
+      : { kind: "CONNECT", client: "mcp", ...rest, scopes };
+    return this.call("createChallenge", "POST", "/api/pair/challenges", request, false);
   }
 
-  renew(keyCommitment: string): Promise<CreatedChallenge> {
-    return this.call("renew", "POST", "/api/client/pair/renew", { keyCommitment });
+  /** A renewal; with `grants` (only `itmo:*` ids) it is protocol 2 and asks for exactly those ITMO grants. */
+  renew(keyCommitment: string, grants?: GrantRequest[]): Promise<CreatedChallenge> {
+    return this.call("renew", "POST", "/api/client/pair/renew", grants ? { keyCommitment, grants } : { keyCommitment });
   }
 
   claim(challengeId: string, claimSecret: string): Promise<PairingClaim> {

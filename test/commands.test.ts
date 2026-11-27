@@ -3,10 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { StateStore } from "../src/auth/state-store.js";
-import { addToCursor, statusCommand, unpairCommand } from "../src/commands.js";
+import { addToCursor, pairRequestText, statusCommand, unpairCommand } from "../src/commands.js";
 import { loadConfig } from "../src/config.js";
 import { type Handler, stubFetch } from "./support/fetch.js";
-import { notFound } from "./support/itmo-id.js";
+import { callback, isAuthorize, notFound, sessionTokenResponse } from "./support/itmo-id.js";
 import { fail, ok } from "./support/widgets.js";
 
 const CONNECTION = {
@@ -74,6 +74,44 @@ describe("CLI commands", () => {
     expect(new URLSearchParams(fetchFn.calls[1]!.body).get("refresh_token")).toBe("paired");
     expect(output()).toContain("Отключено");
     expect(await store.read()).toEqual({});
+  });
+
+  it("unpair of a cookie session ends it with a minted refresh token and wipes the cookie", async () => {
+    const { context, store, fetchFn } = await setup((call) => {
+      if (call.method === "DELETE") return ok({});
+      if (isAuthorize(call)) return callback(call);
+      if (call.url.pathname.endsWith("/token")) return sessionTokenResponse("sid", "minted");
+      if (call.url.pathname.endsWith("/logout")) return new Response(null, { status: 204 });
+      return notFound(call);
+    });
+    await store.update({ refreshToken: undefined, keycloakIdentity: "paired-cookie", connection: { ...CONNECTION, itmoGrants: ["itmo:sso"] } });
+
+    await unpairCommand(context);
+
+    expect(fetchFn.calls.map((c) => c.url.pathname.split("/").pop())).toEqual(["self", "auth", "token", "logout"]);
+    expect(fetchFn.calls[1]!.headers.get("cookie")).toBe("KEYCLOAK_IDENTITY=paired-cookie");
+    expect(new URLSearchParams(fetchFn.calls[3]!.body).get("refresh_token")).toBe("minted");
+    expect(await store.read()).toEqual({});
+  });
+
+  it("status names the grant BARS needs", async () => {
+    const { context, output } = await setup(() => ok({ isu: 123456, connection: { scopes: [] } }));
+
+    await statusCommand(context, new Date("2026-10-22T09:00:00Z"));
+
+    expect(output()).toContain("Доступ к ИТМО: вход в my.itmo.\n");
+    expect(output()).toContain("нужен полный доступ к ITMO.ID (itmo:sso), itmo-mcp renew --itmo-cookie");
+  });
+
+  it("pair tells what it asks for and what stops working without each grant", () => {
+    const withCookie = pairRequestText({ itmoCookie: true });
+    const plain = pairRequestText({ scopes: ["reviews:read"] });
+
+    expect(withCookie).toContain("Отзывы о преподавателях, Ссылки предметов: инструменты widgets_*");
+    expect(withCookie).toContain("Без полного доступа не работают инструменты БАРС (bars_*)");
+    expect(withCookie).toContain("любой сервис ИТМО");
+    expect(plain).toContain("Отзывы о преподавателях (инструменты widgets_*) и вход в my.itmo");
+    expect(plain).toContain("itmo-mcp pair --itmo-cookie");
   });
 
   it("adds the server to Cursor's mcp.json and keeps other servers", async () => {

@@ -6,6 +6,7 @@ import { createToolDeps } from "./app.js";
 import { StateStore } from "./auth/state-store.js";
 import {
   type CommandContext,
+  type PairCommandOptions,
   pairCommand,
   renewCommand,
   setupCommand,
@@ -25,16 +26,24 @@ Usage:
                                Serve MCP over Streamable HTTP at /mcp (health check: /healthz)
 
 Connecting through the ITMO.Widgets app (recommended):
-  itmo-mcp pair [--name N] [--scopes reviews:read,links:read,sport:queue]
+  itmo-mcp pair [--name N] [--scopes reviews:read,links:read,sport:queue] [--itmo-cookie]
                                Show a QR for the app; the phone signs this server in to ITMO.ID
-  itmo-mcp setup               pair, then add itmo-mcp to Claude Code, Codex and Cursor
+  itmo-mcp setup [same options as pair]
+                               pair, then add itmo-mcp to Claude Code, Codex and Cursor
   itmo-mcp status              Connection, scopes, ITMO session and its end date
-  itmo-mcp renew               A new ITMO session for this connection (every 90 days at most)
+  itmo-mcp renew [--itmo-cookie]
+                               A new ITMO session for this connection (every 90 days at most)
   itmo-mcp unpair              End this server's ITMO session and disconnect
+
+  --itmo-cookie                Also ask for full ITMO.ID access (the session's KEYCLOAK_IDENTITY cookie), which
+                               BARS tools need; you choose every grant on the phone. The cookie signs in to every
+                               ITMO service as you (my.itmo, BARS, ISU, ITMO.ID): only on your own computer.
+                               Needs an ITMO.Widgets app that knows the request; without the flag the app only
+                               hands over the my.itmo sign-in, as before.
 
 Credentials without pairing (environment):
   ITMO_REFRESH_TOKEN             my.itmo.ru refresh token (no BARS access)
-  ITMO_KEYCLOAK_IDENTITY         KEYCLOAK_IDENTITY cookie of id.itmo.ru; the only way to BARS tools
+  ITMO_KEYCLOAK_IDENTITY         KEYCLOAK_IDENTITY cookie of id.itmo.ru; BARS tools without pair --itmo-cookie
 
 Other settings:
   ITMO_MCP_STATE_DIR             Where tokens and the pairing are kept (default ~/.config/itmo-mcp)
@@ -45,9 +54,7 @@ Other settings:
   ITMO_MCP_HTTP_ALLOWED_HOSTS    Comma-separated Host header values accepted in HTTP mode
 `;
 
-type PairOptions = { name?: string; scopes?: string[] };
-
-const COMMANDS: Record<string, (context: CommandContext, options: PairOptions) => Promise<void>> = {
+const COMMANDS: Record<string, (context: CommandContext, options: PairCommandOptions) => Promise<void>> = {
   pair: pairCommand,
   setup: setupCommand,
   status: (context) => statusCommand(context),
@@ -65,6 +72,7 @@ async function main(): Promise<void> {
       host: { type: "string", default: "127.0.0.1" },
       name: { type: "string" },
       scopes: { type: "string" },
+      "itmo-cookie": { type: "boolean", default: false },
       help: { type: "boolean", short: "h", default: false },
       version: { type: "boolean", short: "v", default: false },
     },
@@ -80,7 +88,7 @@ async function main(): Promise<void> {
     if (!run || rest.length > 0) throw new Error(`Unknown command: ${positionals.join(" ")}. Run with --help.`);
     const context: CommandContext = { config, terminal: terminal() };
     const scopes = values.scopes?.split(",").map((scope) => scope.trim()).filter(Boolean);
-    await run(context, { name: values.name, scopes });
+    await run(context, { name: values.name, scopes, itmoCookie: values["itmo-cookie"] });
     return;
   }
 

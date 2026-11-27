@@ -4,10 +4,13 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join } from "node:path";
 import { createConnection } from "./app.js";
+import { holdsPairedCookie, ITMO_REFRESH_GRANT, ITMO_SSO_GRANT, itmoGrantsOf } from "./auth/grants.js";
+import type { Connection } from "./auth/state-store.js";
 import type { Config } from "./config.js";
 import type { FetchFn } from "./http.js";
+import { SCOPES } from "./tools/widgets.js";
 import { WidgetsApiError } from "./widgets/client.js";
-import { forgetConnection, pair, type PairingView, renew } from "./widgets/pairing.js";
+import { DEFAULT_SCOPES, forgetConnection, pair, type PairingView, renew } from "./widgets/pairing.js";
 import { terminalQr } from "./widgets/qr.js";
 
 /** Terminal of a CLI command: output, yes/no questions and child processes. */
@@ -65,19 +68,88 @@ export function defaultName(): string {
   return name || "itmo-mcp";
 }
 
-export async function pairCommand(context: CommandContext, options: { name?: string; scopes?: string[] } = {}) {
+/** Options of `pair`, `setup` and `renew` from the command line. */
+export interface PairCommandOptions {
+  name?: string;
+  scopes?: string[];
+  /** `--itmo-cookie`: protocol 2, also ask for full ITMO.ID access (the cookie), which BARS needs. */
+  itmoCookie?: boolean;
+}
+
+const GRANT_TITLES: Record<string, string> = {
+  [ITMO_REFRESH_GRANT]: "вход в my.itmo",
+  [ITMO_SSO_GRANT]: "полный доступ к ITMO.ID",
+};
+
+const COOKIE_WARNING =
+  "Полный доступ — это cookie ITMO.ID: с ней этот компьютер может войти в любой сервис ИТМО от вашего имени\n" +
+  "(my.itmo, БАРС, ИСУ и сам ITMO.ID) на срок входа, до 90 дней. Включайте его, только если это ваш компьютер.\n";
+
+const scopeTitle = (scope: string) => SCOPES[scope.replace(/^widgets:/, "") as keyof typeof SCOPES] ?? scope;
+
+/** What `pair` asks for and what stops working without each grant. */
+export function pairRequestText(options: PairCommandOptions): string {
+  if (!options.itmoCookie) {
+    const scopes = options.scopes?.length ? options.scopes.map(scopeTitle).join(", ") : "доступы ITMO.Widgets по умолчанию";
+    return (
+      `Запрос на доступ: ${scopes} (инструменты widgets_*) и вход в my.itmo (инструменты itmo_*, обязателен).\n` +
+      "Баллы БАРС (bars_*) этот вход не открывает: для них нужен полный доступ к ITMO.ID, itmo-mcp pair --itmo-cookie.\n\n"
+    );
+  }
+  const scopes = (options.scopes?.length ? options.scopes : DEFAULT_SCOPES).map(scopeTitle).join(", ");
+  return (
+    "Запрос на доступ, на телефоне любой можно выключить:\n" +
+    `  - ${scopes}: инструменты widgets_*;\n` +
+    "  - вход в my.itmo: расписание, зачётка, физкультура и заявки (инструменты itmo_*);\n" +
+    "  - полный доступ к ITMO.ID: баллы БАРС (bars_*) и вход в my.itmo без повторной привязки.\n" +
+    "Без входа в my.itmo инструменты itmo_* работают через полный доступ, без обоих — только widgets_*.\n" +
+    "Без полного доступа не работают инструменты БАРС (bars_*).\n" +
+    COOKIE_WARNING +
+    "\n"
+  );
+}
+
+/** What the connection can reach in ITMO and how to get what is missing. */
+function itmoAccessText(connection: Connection, envCookie: boolean): string {
+  if (!connection.itmo) {
+    return (
+      "Вход в ИТМО не передан: работают только инструменты widgets_*.\n" +
+      "Дать вход в my.itmo: itmo-mcp renew; вместе с БАРС: itmo-mcp renew --itmo-cookie.\n"
+    );
+  }
+  const grants = itmoGrantsOf(connection).map((grant) => GRANT_TITLES[grant] ?? grant);
+  const bars = holdsPairedCookie(connection) || envCookie
+    ? ""
+    : "Инструменты БАРС (bars_*) не работают: нужен полный доступ к ITMO.ID (itmo:sso), itmo-mcp renew --itmo-cookie.\n";
+  return `Доступ к ИТМО: ${grants.join(", ")}.\n${bars}`;
+}
+
+export async function pairCommand(context: CommandContext, options: PairCommandOptions = {}) {
   const { pairing } = pairingDeps(context);
-  const connection = await pair(pairing, { name: options.name ?? defaultName(), scopes: options.scopes });
+  context.terminal.write(pairRequestText(options));
+  const connection = await pair(pairing, { name: options.name ?? defaultName(), scopes: options.scopes, itmoCookie: options.itmoCookie });
+  const until = connection.itmo ? ` Вход в ИТМО до ${formatDate(connection.itmo.expiresAt)}.` : "";
   context.terminal.write(
-    `\nПодключено: «${connection.name}», ISU ${connection.isu}. Вход в ИТМО до ${formatDate(connection.itmo.expiresAt)}.\n` +
+    `\nПодключено: «${connection.name}», ISU ${connection.isu}.${until}\n` +
+      itmoAccessText(connection, Boolean(context.config.credentials.keycloakIdentity)) +
       "Перезапустите MCP-клиент, если itmo-mcp в нём уже запущен.\n",
   );
 }
 
-export async function renewCommand(context: CommandContext) {
+export async function renewCommand(context: CommandContext, options: PairCommandOptions = {}) {
   const { pairing } = pairingDeps(context);
-  const connection = await renew(pairing);
-  context.terminal.write(`\nВход в ИТМО обновлён: до ${formatDate(connection.itmo.expiresAt)}.\n`);
+  if (options.itmoCookie) {
+    context.terminal.write(
+      "Запрос на доступ: вход в my.itmo и полный доступ к ITMO.ID (баллы БАРС, bars_*), на телефоне любой можно выключить.\n" +
+        COOKIE_WARNING +
+        "\n",
+    );
+  }
+  const connection = await renew(pairing, { itmoCookie: options.itmoCookie });
+  context.terminal.write(
+    `\nВход в ИТМО обновлён: до ${formatDate(connection.itmo!.expiresAt)}.\n` +
+      itmoAccessText(connection, Boolean(context.config.credentials.keycloakIdentity)),
+  );
 }
 
 export async function statusCommand(context: CommandContext, now = new Date()) {
@@ -88,12 +160,16 @@ export async function statusCommand(context: CommandContext, now = new Date()) {
     write("ITMO.Widgets: не подключено. Подключить: itmo-mcp pair\n");
     return;
   }
-  const days = Math.floor((Date.parse(connection.itmo.expiresAt) - now.getTime()) / DAY_MS);
-  const health =
-    connection.itmo.status === "closed"
-      ? "закрыт, выполните itmo-mcp renew"
-      : `работает до ${formatDate(connection.itmo.expiresAt)}${days < 7 ? ` (осталось ${Math.max(days, 0)} дн., выполните itmo-mcp renew)` : ""}`;
-  write(`ITMO.Widgets: MCP «${connection.name}», ISU ${connection.isu}\nВход в ИТМО: ${health}\n`);
+  write(`ITMO.Widgets: MCP «${connection.name}», ISU ${connection.isu}\n`);
+  if (connection.itmo) {
+    const days = Math.floor((Date.parse(connection.itmo.expiresAt) - now.getTime()) / DAY_MS);
+    const health =
+      connection.itmo.status === "closed"
+        ? "закрыт, выполните itmo-mcp renew"
+        : `работает до ${formatDate(connection.itmo.expiresAt)}${days < 7 ? ` (осталось ${Math.max(days, 0)} дн., выполните itmo-mcp renew)` : ""}`;
+    write(`Вход в ИТМО: ${health}\n`);
+  }
+  write(itmoAccessText(connection, Boolean(context.config.credentials.keycloakIdentity)));
   try {
     const me = await widgets.me();
     const granted = me.connection.scopes.filter((grant) => grant.granted).map((grant) => grant.scope.title);
@@ -155,7 +231,7 @@ export async function addToCursor(file: string, env: [string, string][]): Promis
 }
 
 /** `setup`: `pair` unless already paired, then adds itmo-mcp to Claude Code, Codex and Cursor, asking for each. */
-export async function setupCommand(context: CommandContext, options: { name?: string; scopes?: string[] } = {}) {
+export async function setupCommand(context: CommandContext, options: PairCommandOptions = {}) {
   const { store } = pairingDeps(context);
   if ((await store.read()).connection) context.terminal.write("ITMO.Widgets уже подключено.\n");
   else await pairCommand(context, options);

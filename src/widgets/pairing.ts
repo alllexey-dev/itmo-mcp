@@ -1,10 +1,18 @@
 import { CredentialRejectedError } from "../auth/errors.js";
+import { holdsPairedCookie, ITMO_REFRESH_GRANT, ITMO_SSO_GRANT, pairedCookie } from "../auth/grants.js";
 import { isuFromAccessToken, type ItmoIdClient, MY_ITMO_CLIENT } from "../auth/itmo-id.js";
+import { endSession, SessionMismatchError, tokensFromCookie } from "../auth/paired-session.js";
 import { currentPlatform } from "../auth/session-label.js";
 import type { Connection, StateStore } from "../auth/state-store.js";
 import { VERSION } from "../version.js";
-import { WidgetsApiError, type CreatedChallenge, type PairingClaim, type WidgetsClient } from "./client.js";
-import { type PairingBundle, type PairingKind, PairingTarget } from "./crypto.js";
+import {
+  type CreatedChallenge,
+  type GrantRequest,
+  type PairingClaim,
+  WidgetsApiError,
+  type WidgetsClient,
+} from "./client.js";
+import { type ItmoSession, type PairingBundle, type PairingKind, PairingTarget } from "./crypto.js";
 
 /** Shows the pairing in the terminal. */
 export interface PairingView {
@@ -33,8 +41,27 @@ export class PairingError extends Error {
 const POLL_MS = 2_000;
 const MAX_WAIT_MS = 15 * 60_000;
 
+/** Widgets scopes `pair --itmo-cookie` asks for when `--scopes` is not given (the registry's defaults). */
+export const DEFAULT_SCOPES = ["reviews:read", "links:read"];
+
+/** ITMO grants of protocol 2: the refresh token and the cookie, both optional; the user picks on the phone. */
+export const ITMO_GRANTS: GrantRequest[] = [{ id: ITMO_REFRESH_GRANT }, { id: ITMO_SSO_GRANT }];
+
+/** The protocol 2 request of `pair --itmo-cookie`: `--scopes` as `widgets:*`, then the ITMO grants; none required. */
+export function connectGrants(scopes: string[] = DEFAULT_SCOPES): GrantRequest[] {
+  const widgets = scopes.map((scope) => `widgets:${scope.replace(/^widgets:/, "")}`);
+  return [...new Set(widgets)].map((id) => ({ id })).concat(ITMO_GRANTS);
+}
+
+export interface PairOptions {
+  name: string;
+  scopes?: string[];
+  /** Protocol 2: also ask for the ITMO.ID cookie (`itmo:sso`) and let the phone choose every grant. */
+  itmoCookie?: boolean;
+}
+
 /** `pair`: a new `mcp` connection with its own ITMO.ID session, signed in on the phone. */
-export async function pair(deps: Pairing, options: { name: string; scopes?: string[] }): Promise<Connection> {
+export async function pair(deps: Pairing, options: PairOptions): Promise<Connection> {
   if ((await deps.store.read()).connection) {
     throw new PairingError("Уже подключено: `itmo-mcp renew` обновит вход в ИТМО, `itmo-mcp unpair` отключит");
   }
@@ -44,24 +71,31 @@ export async function pair(deps: Pairing, options: { name: string; scopes?: stri
     name: options.name,
     version: VERSION,
     platform: currentPlatform(),
-    scopes: options.scopes,
+    ...(options.itmoCookie ? { grants: connectGrants(options.scopes) } : { scopes: options.scopes }),
   });
   const claim = await waitForClaim(deps, target, challenge);
   if (!claim.token?.startsWith("iwc_") || !claim.connection) throw new PairingError("Сервер не выдал токен подключения");
   const widgets = deps.widgets.withToken(claim.token);
   try {
-    const bundle = await openBundle(deps, target, challenge, claim, "CONNECT");
+    // Protocol 2 without any ITMO grant has no bundle: the connection is for widgets_* tools only.
+    const bundle = claim.sealedBundle || !options.itmoCookie ? await openBundle(deps, target, challenge, claim, "CONNECT") : undefined;
     const me = await widgets.me();
-    const refreshToken = await checkSession(deps, bundle, me.isu);
+    const session = bundle?.itmo ? await checkSession(deps, bundle, bundle.itmo, me.isu) : undefined;
+    if (bundle && bundle.isu !== me.isu) throw new PairingError(OTHER_ACCOUNT);
     const connection: Connection = {
       token: claim.token,
       id: claim.connection.id,
       name: claim.connection.name,
-      isu: bundle.isu,
-      itmo: sessionOf(bundle),
+      isu: me.isu,
+      ...(bundle?.v === 2 || !bundle ? { itmoGrants: bundle?.itmo?.grants ?? [] } : {}),
+      ...(bundle?.itmo ? { itmo: sessionOf(bundle.itmo) } : {}),
     };
-    await deps.store.update({ refreshToken, connection });
-    await widgets.reportStatus("ok").catch(() => undefined);
+    await deps.store.update({
+      refreshToken: session?.refreshToken,
+      connection,
+      ...(session?.keycloakIdentity ? { keycloakIdentity: session.keycloakIdentity } : {}),
+    });
+    await widgets.reportStatus(session ? "ok" : "none").catch(() => undefined);
     return connection;
   } catch (error) {
     await widgets.revokeSelf().catch(() => undefined);
@@ -69,35 +103,56 @@ export async function pair(deps: Pairing, options: { name: string; scopes?: stri
   }
 }
 
-/** `renew`: a new ITMO.ID session for the stored connection; the old one is ended once the new one works. */
-export async function renew(deps: Pairing): Promise<Connection> {
+/**
+ * `renew`: a new ITMO.ID session for the stored connection; the old one is ended once the new one works. With
+ * `itmoCookie` it asks (protocol 2) for the refresh token and the cookie; without, Backend asks for the grants the
+ * connection holds.
+ */
+export async function renew(deps: Pairing, options: { itmoCookie?: boolean } = {}): Promise<Connection> {
   const state = await deps.store.read();
   const current = state.connection;
   if (!current) throw new PairingError("Не подключено: сначала `itmo-mcp pair`");
   const widgets = deps.widgets.withToken(current.token);
   const target = await PairingTarget.create();
-  const challenge = await widgets.renew(target.keyCommitment());
+  const challenge = await widgets.renew(target.keyCommitment(), options.itmoCookie ? ITMO_GRANTS : undefined);
   const claim = await waitForClaim(deps, target, challenge);
   const bundle = await openBundle(deps, target, challenge, claim, "RENEW");
-  const refreshToken = await checkSession(deps, bundle, current.isu);
-  const connection: Connection = { ...current, itmo: sessionOf(bundle) };
-  await deps.store.update({ refreshToken, connection });
-  if (state.refreshToken && current.itmo.sid !== bundle.itmo.sid) {
-    await deps.idClient.logout(MY_ITMO_CLIENT, state.refreshToken).catch(() => undefined);
+  if (!bundle.itmo) throw new PairingError(NO_SESSION);
+  const session = await checkSession(deps, bundle, bundle.itmo, current.isu);
+  const connection: Connection = {
+    ...current,
+    ...(bundle.v === 2 ? { itmoGrants: bundle.itmo.grants } : { itmoGrants: undefined }),
+    itmo: sessionOf(bundle.itmo),
+  };
+  const oldCookie = pairedCookie(state);
+  await deps.store.update({
+    refreshToken: session.refreshToken,
+    connection,
+    // the old session's cookie ends with it; a rotated env cookie stays
+    ...(session.keycloakIdentity || oldCookie ? { keycloakIdentity: session.keycloakIdentity } : {}),
+  });
+  if (current.itmo && current.itmo.sid !== bundle.itmo.sid) {
+    await endSession(deps.idClient, { refreshToken: state.refreshToken, keycloakIdentity: oldCookie });
   }
   await widgets.reportStatus("ok").catch(() => undefined);
   return connection;
 }
 
 /**
- * Ends this server's own ITMO.ID session (OIDC logout with its refresh token) and forgets the connection and the
- * session. Env credentials are kept. Returns false when nothing was paired.
+ * Ends this server's own ITMO.ID session (OIDC logout with its refresh token, or one minted from its cookie) and
+ * forgets the connection and the session's credentials. Env credentials are kept. Returns false when nothing was
+ * paired.
  */
 export async function forgetConnection(store: StateStore, idClient: ItmoIdClient): Promise<boolean> {
   const state = await store.read();
   if (!state.connection) return false;
-  if (state.refreshToken) await idClient.logout(MY_ITMO_CLIENT, state.refreshToken).catch(() => undefined);
-  await store.update({ connection: undefined, refreshToken: undefined });
+  const cookie = pairedCookie(state);
+  await endSession(idClient, { refreshToken: state.refreshToken, keycloakIdentity: cookie });
+  await store.update({
+    connection: undefined,
+    refreshToken: undefined,
+    ...(holdsPairedCookie(state.connection) ? { keycloakIdentity: undefined } : {}),
+  });
   return true;
 }
 
@@ -135,31 +190,64 @@ function openBundle(
   claim: PairingClaim,
   kind: PairingKind,
 ): Promise<PairingBundle> {
-  if (!claim.sealedBundle) throw new PairingError("Телефон не передал вход в ИТМО");
+  if (!claim.sealedBundle) throw new PairingError(NO_SESSION);
   return target.open(claim.sealedBundle, challenge.challengeId, kind, (deps.now ?? (() => new Date()))());
 }
 
+const NO_SESSION = "Телефон не передал вход в ИТМО";
+const OTHER_ACCOUNT = "Это другой аккаунт ITMO: войдите на телефоне в свой аккаунт и подключите заново";
+const REFUSED = "ИТМО не принял новый вход: подключите ещё раз";
+
 /**
- * Refreshes the handed-over token once (the canary) and checks that the session is the connection owner's.
- * A session of another account is ended at once. Returns the rotated refresh token.
+ * Checks that the handed-over session works and is the connection owner's: the refresh token is refreshed once
+ * (the canary), the cookie signs in silently once and its tokens must carry the bundle's `sid` and the owner's ISU.
+ * On any failure every session this check reached is ended. Returns the credentials to keep: the rotated refresh
+ * token (or, with the cookie only, the one minted from it) and the cookie as ITMO.ID left it.
  */
-async function checkSession(deps: Pairing, bundle: PairingBundle, ownerIsu: number): Promise<string> {
-  let tokens;
+async function checkSession(
+  deps: Pairing,
+  bundle: PairingBundle,
+  itmo: ItmoSession,
+  ownerIsu: number,
+): Promise<{ refreshToken: string; keycloakIdentity?: string }> {
+  const reached: string[] = [];
+  const fail = async (message: string): Promise<never> => {
+    for (const token of reached) await deps.idClient.logout(MY_ITMO_CLIENT, token).catch(() => undefined);
+    throw new PairingError(message);
+  };
+  let refreshToken: string | undefined;
+  let keycloakIdentity: string | undefined;
   try {
-    tokens = await deps.idClient.refresh(MY_ITMO_CLIENT, bundle.itmo.refreshToken);
+    if (itmo.refreshToken) {
+      const tokens = await deps.idClient.refresh(MY_ITMO_CLIENT, itmo.refreshToken);
+      refreshToken = tokens.refreshToken || itmo.refreshToken;
+      reached.push(refreshToken);
+      if (bundle.isu !== ownerIsu || isuFromAccessToken(tokens.accessToken) !== ownerIsu) return await fail(OTHER_ACCOUNT);
+    }
+    if (itmo.keycloakIdentity) {
+      if (bundle.isu !== ownerIsu) {
+        await endSession(deps.idClient, { keycloakIdentity: itmo.keycloakIdentity });
+        return await fail(OTHER_ACCOUNT);
+      }
+      const minted = await tokensFromCookie(deps.idClient, itmo.keycloakIdentity, { sid: itmo.sid, isu: ownerIsu });
+      keycloakIdentity = minted.keycloakIdentity;
+      if (minted.tokens.refreshToken) reached.push(minted.tokens.refreshToken);
+      refreshToken ??= minted.tokens.refreshToken || undefined;
+    }
   } catch (error) {
-    if (error instanceof CredentialRejectedError) throw new PairingError("ИТМО не принял новый вход: подключите ещё раз");
+    if (error instanceof PairingError) throw error; // sessions already ended
+    if (error instanceof SessionMismatchError) {
+      return await fail(error.mismatch === "isu" ? OTHER_ACCOUNT : "Полный доступ к ITMO.ID не от этого входа: подключите ещё раз");
+    }
+    if (error instanceof CredentialRejectedError) return await fail(REFUSED);
+    for (const token of reached) await deps.idClient.logout(MY_ITMO_CLIENT, token).catch(() => undefined);
     throw error;
   }
-  const refreshToken = tokens.refreshToken || bundle.itmo.refreshToken;
-  if (bundle.isu !== ownerIsu || isuFromAccessToken(tokens.accessToken) !== ownerIsu) {
-    await deps.idClient.logout(MY_ITMO_CLIENT, refreshToken).catch(() => undefined);
-    throw new PairingError("Это другой аккаунт ITMO: войдите на телефоне в свой аккаунт и подключите заново");
-  }
-  return refreshToken;
+  if (!refreshToken) return await fail(REFUSED);
+  return { refreshToken, keycloakIdentity };
 }
 
-function sessionOf(bundle: PairingBundle): Connection["itmo"] {
-  const { sid, expiresAt, refreshExpiresAt } = bundle.itmo;
-  return { sid, expiresAt, refreshExpiresAt, status: "ok" };
+function sessionOf(itmo: ItmoSession): NonNullable<Connection["itmo"]> {
+  const { sid, expiresAt, refreshExpiresAt } = itmo;
+  return { sid, expiresAt, ...(refreshExpiresAt ? { refreshExpiresAt } : {}), status: "ok" };
 }

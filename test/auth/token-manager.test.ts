@@ -4,12 +4,20 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Credentials } from "../../src/config.js";
 import { AuthError } from "../../src/auth/errors.js";
-import { ItmoIdClient } from "../../src/auth/itmo-id.js";
+import { BARS_CLIENT, ItmoIdClient } from "../../src/auth/itmo-id.js";
 import { SsoLogin } from "../../src/auth/sso.js";
 import { StateStore } from "../../src/auth/state-store.js";
 import { TokenManager } from "../../src/auth/token-manager.js";
-import { type Handler, json, stubFetch } from "../support/fetch.js";
-import { callback, invalidGrant, isAuthorize, isToken, notFound, tokenResponse } from "../support/itmo-id.js";
+import { type Handler, json, type RecordedCall, stubFetch } from "../support/fetch.js";
+import {
+  callback,
+  invalidGrant,
+  isAuthorize,
+  isToken,
+  notFound,
+  sessionTokenResponse,
+  tokenResponse,
+} from "../support/itmo-id.js";
 
 function setup(handler: Handler, credentials: Credentials, now = () => 0) {
   const fetchFn = stubFetch(handler);
@@ -136,7 +144,95 @@ describe("TokenManager", () => {
 
       expect(fetchFn.calls).toHaveLength(1);
       expect(closed).toEqual(["closed"]);
-      expect((await store.read()).connection?.itmo.status).toBe("closed");
+      expect((await store.read()).connection?.itmo?.status).toBe("closed");
     });
+
+    const SSO_CONNECTION = { ...CONNECTION, itmoGrants: ["itmo:sso"] };
+    const isCookie = (call: RecordedCall) => call.headers.get("cookie") === "KEYCLOAK_IDENTITY=paired-cookie";
+
+    it("falls back to the paired cookie once the refresh token is refused, checking the session id", async () => {
+      const { tokens, store, fetchFn, closed } = setup(
+        (call) => {
+          if (isAuthorize(call)) return isCookie(call) ? callback(call, "code", ["KEYCLOAK_IDENTITY=rotated; Path=/"]) : notFound(call);
+          return grant(call) === "refresh_token" ? invalidGrant() : sessionTokenResponse("sid", "minted");
+        },
+        { keycloakIdentity: "env-cookie", refreshToken: "env-refresh" },
+      );
+      await store.update({ refreshToken: "paired", keycloakIdentity: "paired-cookie", connection: SSO_CONNECTION });
+
+      await tokens.accessToken();
+
+      expect(fetchFn.calls.map((c) => (isAuthorize(c) ? "authorize" : grant(c)))).toEqual([
+        "refresh_token",
+        "authorize",
+        "authorization_code",
+      ]);
+      expect(closed).toEqual([]);
+      expect(await store.read()).toMatchObject({ refreshToken: "minted", keycloakIdentity: "rotated", connection: SSO_CONNECTION });
+    });
+
+    it("ends a session of another sid reached with the cookie and marks the paired one closed", async () => {
+      const { tokens, store, fetchFn, closed } = setup((call) => {
+        if (isAuthorize(call)) return callback(call);
+        if (call.url.pathname.endsWith("/logout")) return new Response(null, { status: 204 });
+        return grant(call) === "refresh_token" ? invalidGrant() : sessionTokenResponse("sid-other", "minted");
+      }, {});
+      await store.update({ refreshToken: "paired", keycloakIdentity: "paired-cookie", connection: SSO_CONNECTION });
+
+      await expect(tokens.accessToken()).rejects.toThrow(/itmo-mcp renew/);
+
+      expect(fetchFn.calls.map((c) => c.url.pathname.split("/").pop())).toEqual(["token", "auth", "token", "logout"]);
+      expect(closed).toEqual(["closed"]);
+      expect((await store.read()).connection?.itmo?.status).toBe("closed");
+    });
+
+    it("never uses a stored cookie the connection was not granted", async () => {
+      const { tokens, store, fetchFn } = setup(() => invalidGrant(), {});
+      await store.update({ refreshToken: "paired", keycloakIdentity: "env-rotated", connection: CONNECTION });
+
+      await expect(tokens.accessToken()).rejects.toThrow(/itmo-mcp renew/);
+      expect(fetchFn.calls.filter(isAuthorize)).toEqual([]);
+    });
+
+    it("explains the missing grant when the phone handed over no ITMO session", async () => {
+      const { tokens, store, fetchFn } = setup(notFound, { refreshToken: "env-refresh" });
+      await store.update({ connection: { token: "iwc_x", id: "c", name: "laptop", isu: 123456, itmoGrants: [] } });
+
+      await expect(tokens.accessToken()).rejects.toThrow(/itmo:refresh:student-personal-cabinet.*itmo-mcp renew/);
+      expect(fetchFn.calls).toEqual([]);
+    });
+  });
+});
+
+describe("SsoLogin", () => {
+  function sso(credentials: Credentials) {
+    const fetchFn = stubFetch((call) => (isAuthorize(call) ? callback(call) : notFound(call)));
+    const store = new StateStore(mkdtempSync(join(tmpdir(), "itmo-mcp-sso-")));
+    return { fetchFn, store, login: new SsoLogin(new ItmoIdClient(fetchFn), store, credentials) };
+  }
+
+  it("a server paired with itmo:sso signs in only with its own cookie", async () => {
+    const { fetchFn, store, login } = sso({ keycloakIdentity: "env-cookie" });
+    await store.update({ keycloakIdentity: "paired-cookie", connection: { ...CONNECTION, itmoGrants: ["itmo:sso"] } });
+
+    await login.authorize(BARS_CLIENT);
+
+    expect(fetchFn.calls.map((c) => c.headers.get("cookie"))).toEqual(["KEYCLOAK_IDENTITY=paired-cookie"]);
+  });
+
+  it("a paired server without itmo:sso keeps the env cookie for BARS", async () => {
+    const { fetchFn, store, login } = sso({ keycloakIdentity: "env-cookie" });
+    await store.update({ refreshToken: "paired", connection: CONNECTION });
+
+    await login.authorize(BARS_CLIENT);
+
+    expect(fetchFn.calls.map((c) => c.headers.get("cookie"))).toEqual(["KEYCLOAK_IDENTITY=env-cookie"]);
+  });
+
+  it("names the grant BARS needs when there is no cookie", async () => {
+    const { store, login } = sso({});
+    await store.update({ refreshToken: "paired", connection: CONNECTION });
+
+    await expect(login.authorize(BARS_CLIENT)).rejects.toThrow(/itmo:sso.*itmo-mcp renew --itmo-cookie/);
   });
 });

@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { Chacha20Poly1305 } from "@hpke/chacha20poly1305";
 import { CipherSuite, DhkemX25519HkdfSha256, HkdfSha256 } from "@hpke/core";
+import { ITMO_REFRESH_GRANT, ITMO_SSO_GRANT, KNOWN_ITMO_GRANTS } from "../auth/grants.js";
 
 /**
  * The client side of ITMO.Widgets pairing (Backend `docs/contracts/connections.md`, the same bytes as the app's
@@ -10,14 +11,34 @@ import { CipherSuite, DhkemX25519HkdfSha256, HkdfSha256 } from "@hpke/core";
 
 export type PairingKind = "CONNECT" | "RENEW";
 
-/** What the phone seals for this client: a fresh ITMO.ID session of its own. Secret, never logged. */
+/** This client's id in the ITMO.Widgets client registry (protocol 2). */
+export const CLIENT_ID = "itmo-mcp";
+
+/**
+ * What the phone sealed for this client, v1 or v2 read into one shape. Secret, never logged.
+ * `itmo` is absent when the phone sealed no ITMO grant this version knows.
+ */
 export interface PairingBundle {
-  v: 1;
+  v: 1 | 2;
   challengeId: string;
   kind: PairingKind;
   isu: number;
   issuedAt: string;
-  itmo: { sid: string; expiresAt: string; refreshToken: string; refreshExpiresAt?: string };
+  itmo?: ItmoSession;
+}
+
+/** The fresh ITMO.ID session the phone signed in for this client and the credentials it granted from it. */
+export interface ItmoSession {
+  sid: string;
+  expiresAt: string;
+  /** The known ITMO grants that came, in the phone's order. */
+  grants: string[];
+  /** `itmo:refresh:student-personal-cabinet` (always present in v1). */
+  refreshToken?: string;
+  refreshExpiresAt?: string;
+  /** `itmo:sso`: the session's KEYCLOAK_IDENTITY. */
+  keycloakIdentity?: string;
+  keycloakIdentityExpiresAt?: string;
 }
 
 export class BundleError extends Error {
@@ -96,26 +117,77 @@ export class PairingTarget {
     } catch {
       throw new BundleError();
     }
-    let bundle: PairingBundle;
+    let parsed: unknown;
     try {
-      bundle = JSON.parse(Buffer.from(plain).toString("utf8")) as PairingBundle;
+      parsed = JSON.parse(Buffer.from(plain).toString("utf8"));
     } catch {
       throw new BundleError();
     }
-    const valid =
-      bundle.v === 1 &&
-      bundle.challengeId?.toLowerCase() === challengeId.toLowerCase() &&
-      bundle.kind === kind &&
-      Number.isSafeInteger(bundle.isu) &&
-      bundle.isu > 0 &&
-      typeof bundle.itmo?.refreshToken === "string" &&
-      bundle.itmo.refreshToken !== "" &&
-      typeof bundle.itmo.sid === "string";
-    if (!valid) throw new BundleError();
+    const bundle = readBundle(parsed, challengeId, kind);
+    if (!bundle) throw new BundleError();
     const age = now.getTime() - Date.parse(bundle.issuedAt);
     if (!(Math.abs(age) <= MAX_BUNDLE_AGE_MS)) throw new BundleError(": issued too long ago");
     return bundle;
   }
+}
+
+type Json = Record<string, unknown>;
+
+const isObject = (value: unknown): value is Json => typeof value === "object" && value !== null && !Array.isArray(value);
+const isInstant = (value: unknown): value is string => typeof value === "string" && !Number.isNaN(Date.parse(value));
+const isSecret = (value: unknown): value is string => typeof value === "string" && value !== "";
+
+/** Checks a decrypted bundle against the challenge; undefined when anything is off. */
+function readBundle(raw: unknown, challengeId: string, kind: PairingKind): PairingBundle | undefined {
+  if (!isObject(raw)) return undefined;
+  const header =
+    typeof raw.challengeId === "string" &&
+    raw.challengeId.toLowerCase() === challengeId.toLowerCase() &&
+    raw.kind === kind &&
+    Number.isSafeInteger(raw.isu) &&
+    (raw.isu as number) > 0;
+  if (!header) return undefined;
+  const base = { challengeId: raw.challengeId as string, kind, isu: raw.isu as number, issuedAt: raw.issuedAt as string };
+  if (raw.v === 1) {
+    const itmo = raw.itmo;
+    if (!isObject(itmo) || !isSecret(itmo.refreshToken) || typeof itmo.sid !== "string") return undefined;
+    return {
+      ...base,
+      v: 1,
+      itmo: {
+        sid: itmo.sid,
+        expiresAt: itmo.expiresAt as string,
+        grants: [ITMO_REFRESH_GRANT],
+        refreshToken: itmo.refreshToken,
+        refreshExpiresAt: typeof itmo.refreshExpiresAt === "string" ? itmo.refreshExpiresAt : undefined,
+      },
+    };
+  }
+  if (raw.v !== 2 || raw.clientId !== CLIENT_ID || !isInstant(raw.issuedAt)) return undefined;
+  if (raw.itmo === undefined || raw.itmo === null) return { ...base, v: 2 };
+  const itmo = readSession(raw.itmo);
+  if (itmo === null) return undefined;
+  return { ...base, v: 2, ...(itmo ? { itmo } : {}) };
+}
+
+/** v2 `itmo`: null when malformed, undefined when it holds no grant this version knows. */
+function readSession(raw: unknown): ItmoSession | null | undefined {
+  if (!isObject(raw) || !isSecret(raw.sid) || !isInstant(raw.expiresAt) || !Array.isArray(raw.items)) return null;
+  const session: ItmoSession = { sid: raw.sid, expiresAt: raw.expiresAt, grants: [] };
+  for (const item of raw.items) {
+    if (!isObject(item) || typeof item.grant !== "string") return null;
+    if (!KNOWN_ITMO_GRANTS.includes(item.grant)) continue; // granted by a newer app: not for this version
+    if (session.grants.includes(item.grant) || !isSecret(item.value) || !isInstant(item.expiresAt)) return null;
+    session.grants.push(item.grant);
+    if (item.grant === ITMO_REFRESH_GRANT) {
+      session.refreshToken = item.value;
+      session.refreshExpiresAt = item.expiresAt;
+    } else if (item.grant === ITMO_SSO_GRANT) {
+      session.keycloakIdentity = item.value;
+      session.keycloakIdentityExpiresAt = item.expiresAt;
+    }
+  }
+  return session.grants.length > 0 ? session : undefined;
 }
 
 function copy(bytes: Uint8Array): ArrayBuffer {
