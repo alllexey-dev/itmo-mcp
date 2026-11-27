@@ -76,4 +76,94 @@ describe("pairing crypto", () => {
     }
     await expect(target.open("AAAA", CHALLENGE_ID, "CONNECT", NOW)).rejects.toBeInstanceOf(BundleError);
   });
+
+  describe("bundle v2", () => {
+    const v2 = (patch: Record<string, unknown> = {}, itmo: Record<string, unknown> | null = {}) => ({
+      v: 2,
+      challengeId: CHALLENGE_ID,
+      kind: "CONNECT",
+      clientId: "itmo-mcp",
+      isu: 100001,
+      issuedAt: "2026-10-22T08:59:00Z",
+      itmo:
+        itmo === null
+          ? undefined
+          : {
+              sid: "sid-2",
+              expiresAt: "2027-01-20T09:00:00Z",
+              items: [
+                { grant: "itmo:refresh:student-personal-cabinet", value: "test-refresh", expiresAt: "2026-11-21T09:00:00Z" },
+                { grant: "itmo:refresh:some-other-client", value: "other", expiresAt: "2026-11-21T09:00:00Z" },
+                { grant: "itmo:sso", value: "test-cookie", expiresAt: "2027-01-20T09:00:00Z" },
+              ],
+              ...itmo,
+            },
+      ...patch,
+    });
+
+    async function openV2(bundle: unknown) {
+      const target = await PairingTarget.create();
+      const link = target.link("https://widgets.test", "ABCD2345");
+      return target.open(await sealForLink(link, CHALLENGE_ID, "CONNECT", bundle), CHALLENGE_ID, "CONNECT", NOW);
+    }
+
+    it("reads the refresh token and the cookie and ignores grants it does not know", async () => {
+      const opened = await openV2(v2());
+
+      expect(opened).toEqual({
+        v: 2,
+        challengeId: CHALLENGE_ID,
+        kind: "CONNECT",
+        isu: 100001,
+        issuedAt: "2026-10-22T08:59:00Z",
+        itmo: {
+          sid: "sid-2",
+          expiresAt: "2027-01-20T09:00:00Z",
+          grants: ["itmo:refresh:student-personal-cabinet", "itmo:sso"],
+          refreshToken: "test-refresh",
+          refreshExpiresAt: "2026-11-21T09:00:00Z",
+          keycloakIdentity: "test-cookie",
+          keycloakIdentityExpiresAt: "2027-01-20T09:00:00Z",
+        },
+      });
+    });
+
+    it("takes the cookie alone, and no ITMO session when no known grant came", async () => {
+      const cookieOnly = await openV2(v2({}, { items: [{ grant: "itmo:sso", value: "c", expiresAt: "2027-01-20T09:00:00Z" }] }));
+      const unknownOnly = await openV2(v2({}, { items: [{ grant: "itmo:identity", value: "x", expiresAt: "2027-01-20T09:00:00Z" }] }));
+      const none = await openV2(v2({}, null));
+
+      expect(cookieOnly.itmo).toMatchObject({ grants: ["itmo:sso"], keycloakIdentity: "c" });
+      expect(cookieOnly.itmo?.refreshToken).toBeUndefined();
+      expect(unknownOnly.itmo).toBeUndefined();
+      expect(none).toMatchObject({ v: 2, isu: 100001 });
+      expect(none.itmo).toBeUndefined();
+    });
+
+    it("refuses another client's bundle and malformed fields", async () => {
+      const item = (patch: Record<string, unknown>) => ({
+        items: [{ grant: "itmo:sso", value: "c", expiresAt: "2027-01-20T09:00:00Z", ...patch }],
+      });
+      for (const bundle of [
+        v2({ clientId: "itmo-widgets-agent" }),
+        v2({ clientId: undefined }),
+        v2({ isu: "100001" }),
+        v2({ issuedAt: undefined }),
+        v2({ kind: "RENEW" }),
+        v2({}, { sid: "" }),
+        v2({}, { sid: undefined }),
+        v2({}, { expiresAt: "soon" }),
+        v2({}, { items: undefined }),
+        v2({}, { items: [null] }),
+        v2({}, item({ grant: undefined })),
+        v2({}, item({ value: "" })),
+        v2({}, item({ value: 5 })),
+        v2({}, item({ expiresAt: undefined })),
+        v2({}, { items: [...item({}).items, ...item({}).items] }),
+        v2({ v: 3 }),
+      ]) {
+        await expect(openV2(bundle)).rejects.toBeInstanceOf(BundleError);
+      }
+    });
+  });
 });

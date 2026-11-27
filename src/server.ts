@@ -22,7 +22,11 @@ Access to the signed-in student's ITMO University data (my.itmo.ru and bars.itmo
 Dates are Moscow time (YYYY-MM-DD). itmo_get_grades shows final record book grades; bars_get_scores shows
 current-semester points per checkpoint. Data is personal: do not share it beyond what the user asks for.
 widgets_* tools read ITMO.Widgets (teacher reviews, subject links, sport queues) once the server is paired with the
-ITMO.Widgets app (\`itmo-mcp pair\`).`;
+ITMO.Widgets app (\`itmo-mcp pair\`).
+Tools that cannot work are not listed. bars_* tools need an ITMO.ID cookie: the itmo:sso grant ("full ITMO.ID
+access", \`itmo-mcp renew --itmo-cookie\` on a paired server, \`itmo-mcp pair --itmo-cookie\` on a new one) or
+ITMO_KEYCLOAK_IDENTITY. itmo_* tools need an ITMO sign-in: a pairing whose ITMO grants were all turned off on the
+phone lists only widgets_* tools until \`itmo-mcp renew\`.`;
 
 const WRITE_INSTRUCTIONS = `
 Changes (sport enrollment, room booking, requests) take two steps: a *_preview tool checks everything and returns

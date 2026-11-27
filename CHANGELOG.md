@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- `pair --itmo-cookie` and `renew --itmo-cookie` (also `setup --itmo-cookie`) use pairing protocol 2 (ITMO.Widgets
+  ADR 0040): `clientId: "itmo-mcp"` and `grants` instead of `client` and `scopes`. `pair` asks for the `--scopes`
+  as `widgets:*` grants (default `widgets:reviews:read`, `widgets:links:read`), then
+  `itmo:refresh:student-personal-cabinet` and `itmo:sso`, none required; `renew` asks for the two ITMO grants. The
+  user picks every grant on the phone. Without the flag the requests are protocol 1 exactly as before. Needs the
+  Backend and app protocol 2 changes.
+- The sealed bundle v2 is read next to v1: `clientId` must be `itmo-mcp`, `itmo.items` carry `grant`, `value` and
+  `expiresAt`, unknown grants are ignored. The refresh token and the cookie (`itmo:sso`, the session's
+  `KEYCLOAK_IDENTITY`) go to `state.json` (0600), the granted ITMO grants to the connection. With no ITMO grant the
+  server is connected for `widgets_*` tools only and lists no `itmo_*` tools.
+- With a cookie, pairing signs in silently once to my.itmo and checks that the tokens carry the bundle's `sid` and
+  the owner's ISU; otherwise it ends that session and fails. With a refresh token the refresh canary runs as before.
+- A paired server falls back to its cookie (silent sign-in, same `sid` check) when ITMO.ID refuses its refresh
+  token, before it marks the session closed. BARS uses the paired session's cookie; a pairing without `itmo:sso`
+  keeps using `ITMO_KEYCLOAK_IDENTITY` as before. `unpair` and a revoked connection end the session with its
+  refresh token or one minted from the cookie, then wipe the token, the cookie and the connection.
+- `pair` prints what it asks for and what stops working without each grant; `status`, the BARS errors and the
+  server instructions name `itmo:sso` and `itmo-mcp renew --itmo-cookie` when BARS is out of reach.
 - `pair` and `renew` no longer show a code to compare: once the phone opens the link they say to confirm there and
   sign in to ITMO. The phone shows the server's name, version and platform and asks to approve only a QR on the
   user's own screen. The wire is unchanged.
