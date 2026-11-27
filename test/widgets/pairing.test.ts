@@ -29,7 +29,7 @@ function world(options: { kind?: "CONNECT" | "RENEW"; bundle?: Record<string, un
   const kind = options.kind ?? "CONNECT";
   let link = "";
   let claims = 0;
-  const shown: string[] = [];
+  let shown = 0;
   const fetchFn = stubFetch(async (call: RecordedCall) => {
     const route = `${call.method} ${call.url.host}${call.url.pathname}`;
     if (isToken(call)) return options.refresh?.() ?? tokenResponse("rotated");
@@ -63,13 +63,13 @@ function world(options: { kind?: "CONNECT" | "RENEW"; bundle?: Record<string, un
     origin: "https://widgets.test",
     view: {
       link: (value: string) => void (link = value),
-      opened: (code: string) => void shown.push(code),
+      opened: () => void (shown += 1),
     },
     now: () => NOW,
     sleep: async () => undefined,
   };
   const routes = () => fetchFn.calls.map((c) => `${c.method} ${c.url.pathname.replace(CHALLENGE_ID, "{id}")}`);
-  return { deps, store, fetchFn, routes, shown, link: () => link };
+  return { deps, store, fetchFn, routes, shown: () => shown, link: () => link };
 }
 
 describe("pair", () => {
@@ -79,7 +79,7 @@ describe("pair", () => {
     const connection = await pair(deps, { name: "laptop" });
 
     expect(link()).toMatch(/^https:\/\/widgets\.test\/pair#v1\.K7Q2M9AB\.[\w-]{43}\.[\w-]{22}$/);
-    expect(shown).toEqual([expect.stringMatching(/^\d{3} \d{3}$/)]);
+    expect(shown()).toBe(1);
     const create = JSON.parse(fetchFn.calls[0]!.body);
     expect(create).toMatchObject({ kind: "CONNECT", client: "mcp", name: "laptop", keyCommitment: expect.any(String) });
     expect(fetchFn.calls[0]!.headers.get("x-client")).toMatch(/^kind=mcp; version=[^;]+; channel=github; source=alllexey-dev\/itmo-mcp; os=/);

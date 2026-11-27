@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `pair` and `renew` no longer show a code to compare: once the phone opens the link they say to confirm there and
+  sign in to ITMO. The phone shows the server's name, version and platform and asks to approve only a QR on the
+  user's own screen. The wire is unchanged.
 - The API research (`research/`) moved to [my-itmo-api/spec](https://github.com/alllexey-dev/my-itmo-api/tree/master/spec).
   `openapi/my-itmo.yaml` and `openapi/bars.yaml` are now copies of the specifications there: `npm run spec:sync`
   updates them, `npm run spec:check` and the weekly `spec-drift` workflow report a difference.
