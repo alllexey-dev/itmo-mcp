@@ -28,16 +28,13 @@ const bundle = (patch: Record<string, unknown> = {}) => ({
 });
 
 describe("pairing crypto", () => {
-  it("matches the app's commitment, info and verification code vectors", async () => {
+  it("matches the app's commitment and info vectors", async () => {
     const target = await PairingTarget.fromRaw(PRIVATE_KEY, PUBLIC_KEY, SECRET);
 
     expect(Buffer.from(target.keyCommitment(), "base64url").toString("hex")).toBe(
       "20758b0aa1a0d853c836e33b6295d0f4b96108abbeca9699419f52014a03f665",
     );
     expect(pairingInfo(CHALLENGE_ID, "AGENT" as never, SECRET).toString("hex")).toBe(INFO_HEX);
-    expect(target.verificationCode(CHALLENGE_ID)).toBe("765 323");
-    const wrapping = await PairingTarget.fromRaw(PRIVATE_KEY, PUBLIC_KEY, Buffer.alloc(16, 42));
-    expect(wrapping.verificationCode("00000000-0000-0000-0000-000000000001")).toBe("003 981");
   });
 
   it("opens what CryptoKit sealed with the same suite", async () => {

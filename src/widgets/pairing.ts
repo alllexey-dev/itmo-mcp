@@ -9,8 +9,8 @@ import { type PairingBundle, type PairingKind, PairingTarget } from "./crypto.js
 /** Shows the pairing in the terminal. */
 export interface PairingView {
   link(link: string, expiresAt: string): void;
-  /** The phone opened the link: the verification code to compare with the phone's screen. */
-  opened(verificationCode: string): void;
+  /** The phone opened the link; the rest happens there. */
+  opened(): void;
 }
 
 export interface Pairing {
@@ -120,7 +120,7 @@ async function waitForClaim(deps: Pairing, target: PairingTarget, challenge: Cre
       continue; // rate limit, server or network trouble: keep polling
     }
     if (claim.status === "OPENED" && !shown) {
-      deps.view.opened(target.verificationCode(challenge.challengeId));
+      deps.view.opened();
       shown = true;
     }
     if (claim.status === "CLAIMED") return claim;

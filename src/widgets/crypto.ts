@@ -83,13 +83,6 @@ export class PairingTarget {
     return `${origin}/pair#v1.${code}.${b64(this.publicKey)}.${b64(this.secret)}`;
   }
 
-  /** Six digits shown on both screens: the first 20 bits of `SHA-256("iw-pair-sas-v1" || id || pk || s)` mod 10^6. */
-  verificationCode(challengeId: string): string {
-    const d = sha256("iw-pair-sas-v1", uuidBytes(challengeId), this.publicKey, this.secret);
-    const digits = String((((d[0]! << 12) | (d[1]! << 4) | (d[2]! >> 4)) >>> 0) % 1_000_000).padStart(6, "0");
-    return `${digits.slice(0, 3)} ${digits.slice(3)}`;
-  }
-
   /** Opens `enc || ciphertext` (base64url) and checks that the bundle belongs to this challenge and is fresh. */
   async open(sealed: string, challengeId: string, kind: PairingKind, now: Date): Promise<PairingBundle> {
     const raw = Buffer.from(sealed, "base64url");
